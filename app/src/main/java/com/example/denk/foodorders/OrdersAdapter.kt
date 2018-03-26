@@ -39,12 +39,10 @@ class OrdersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     class OrderHolder(override val containerView: View?) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-        private val sdf = SimpleDateFormat("dd MMMM HH:mm", Locale.getDefault())
-
         fun bind(order: GetListOrdersQuery.Order) {
             tvOrderTitle.text = order.place.decription
             tvAuthor.text = "${order.admin.first_name}  ${order.admin.last_name}"
-            tvTimestamp.text = sdf.format(order.date?.times(1000))
+            tvTimestamp.text = order.date?.toDateString()
         }
     }
 
