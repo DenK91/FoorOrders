@@ -5,6 +5,8 @@ import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.widget.LinearLayoutManager
+import android.view.MotionEvent
+import android.view.View
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloCallback
 import com.apollographql.apollo.api.Response
@@ -38,6 +40,16 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         rvOrder.layoutManager = LinearLayoutManager(this)
         getAdapter().itemClickedListen {
             info { it.place.decription }
+        }
+        etSend.setOnTouchListener{ v, event ->
+            if(event.action == MotionEvent.ACTION_UP){
+                if(event.rawX >= (etSend.right - etSend.compoundDrawables[2].bounds.width())) {
+                    sendComment(etSend.text.toString())
+                    etSend.text.clear()
+                    true
+                }
+            }
+            false
         }
         swipeRefreshLayout.setOnRefreshListener { getOrder() }
         getOrder()
@@ -75,6 +87,19 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
                 setOrder(null)
             }
         }, uiHandler))
+    }
+
+    private fun sendComment(text: String){
+        if(!text.isEmpty()){
+            apolloClient.mutate(
+                    CommentMutation.builder()
+                            .order(orderId!!)
+                            .user(prefs.userId)
+                            .text(text)
+                            .build())
+                    .enqueue(null)
+
+        }
     }
 
     private fun setOrder(order: GetOrderQuery.OrderById?) {
