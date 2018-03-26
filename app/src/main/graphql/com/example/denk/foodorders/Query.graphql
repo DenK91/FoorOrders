@@ -63,3 +63,17 @@ query GetOrder($orderId: String!){
 mutation Comment($user: String!, $order: String!, $text: String!){
   commentOrder(user_id: $user, order_id: $order, text: $text)
 }
+
+mutation CreateOrder($userId: String!, $placeId: String!) {
+  createOrder(userId: $userId, placeId: $placeId)
+}
+
+query Places {
+  places {
+    _id
+    name
+    decription
+    phone
+    site
+  }
+}
