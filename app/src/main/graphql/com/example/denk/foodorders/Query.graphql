@@ -1,0 +1,61 @@
+mutation GetUserId($aFirstName:String!, $aLastName:String!){
+  findOrCreateUser(firstName : $aFirstName, lastName : $aLastName)
+}
+
+query GetUsers{
+  users{
+    _id
+    first_name
+    last_name
+  }
+}
+
+query GetListOrders{
+  orders {
+    _id
+    date
+    state
+    admin {
+      _id
+      first_name
+      last_name
+    }
+    place {
+      _id
+      decription
+    }
+  }
+}
+
+query GetOrder($orderId: String!){
+ orderById(id: $orderId) {
+         admin {
+             first_name
+             last_name
+         }
+         place {
+            decription
+         }
+         date
+         state
+         suborders {
+            author {
+                first_name
+                last_name
+            }
+            products {
+                name
+                description
+                photo
+                price
+            }
+         }
+         comments {
+            text
+            author {
+                first_name
+                last_name
+            }
+         }
+ }
+}
