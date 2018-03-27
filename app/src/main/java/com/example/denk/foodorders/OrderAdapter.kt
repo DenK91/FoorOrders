@@ -14,7 +14,7 @@ import java.util.*
 
 class OrderAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    enum class ViewType{ HEADER, COMMENT, SUBORDER};
+    enum class ViewType{ HEADER, COMMENT, SUBORDER}
 
     private var order : GetOrderQuery.OrderById? = null
 

@@ -62,7 +62,13 @@ query GetOrder($orderId: String!){
 }
 
 mutation Comment($user: String!, $order: String!, $text: String!){
-  commentOrder(user_id: $user, order_id: $order, text: $text)
+  commentOrder(user_id: $user, order_id: $order, text: $text) {
+  text
+              author {
+                  first_name
+                  last_name
+              }
+  }
 }
 
 query MenuByPlaceId($place: String!){

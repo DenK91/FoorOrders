@@ -131,24 +131,23 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
 
                     val arrayAdapter = PlaceAdapter(this@OrdersActivity, places)
 
-                    builderSingle.setNegativeButton(android.R.string.cancel, { dialog, which -> dialog.dismiss() })
-                    builderSingle.setAdapter(arrayAdapter, { dialog, which ->
+                    builderSingle.setNegativeButton(android.R.string.cancel, { dialog, _ -> dialog.dismiss() })
+                    builderSingle.setAdapter(arrayAdapter, { _, which ->
                         val place = arrayAdapter.getItem(which)
                         val builderInner = AlertDialog.Builder(this@OrdersActivity)
                         builderInner.setMessage("${place.name}\n${place.decription}")
                         builderInner.setTitle("Вы выбрали:")
-                        builderInner.setPositiveButton("Создать", {dialog, which->
+                        builderInner.setPositiveButton("Создать", {dialog, _->
                             run {
                                 callCreateOrderMutation?.cancel()
                                 callCreateOrderMutation = apolloClient.mutate(CreateOrderMutation.builder()
                                         .userId(prefs.userId).placeId(place._id!!).build())
                                 callCreateOrderMutation?.enqueue(ApolloCallback<CreateOrderMutation.Data>(object : ApolloCall.Callback<CreateOrderMutation.Data>() {
                                     override fun onResponse(response: Response<CreateOrderMutation.Data>) {
-                                        if (response.data()?.createOrder!!) {
-                                            toast("Заказ создан успешно!")
-                                        }
                                         dialog.dismiss()
-                                        getOrders()
+                                        startActivity(intentFor<DetailsOrderActivity>()
+                                                .putExtra(DetailsOrderActivity.ORDER_ID_KEY, response.data()?.createOrder))
+                                        toast("Заказ создан успешно!")
                                     }
 
                                     override fun onFailure(e: ApolloException) {

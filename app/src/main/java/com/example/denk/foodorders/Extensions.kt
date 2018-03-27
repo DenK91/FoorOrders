@@ -4,11 +4,9 @@ import android.os.Handler
 import android.os.Looper
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
-import android.view.View
 import android.widget.ImageView
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloCallback
-import com.apollographql.apollo.ApolloQueryCall
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.squareup.picasso.Picasso
@@ -35,7 +33,7 @@ fun Long.toDateString(format: String = "dd MMMM HH:mm"): String {
             .format(this.times(1000));
 }
 
-fun <T> ApolloQueryCall<T>.enqueue(
+fun <T> ApolloCall<T>.enqueue(
         onSuccess: (response: Response<T>) -> Unit,
         onFailure: (ex: ApolloException) -> Unit = { it.printStackTrace() }) {
 

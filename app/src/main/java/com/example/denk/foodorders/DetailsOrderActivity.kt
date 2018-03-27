@@ -88,14 +88,14 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         return true
     }
 
-    private fun getOrder() {
+    private fun getOrder(scrollToEnd: Boolean = false) {
         callGetOrderById?.cancel()
         callGetOrderById = apolloClient.query(GetOrderQuery.builder().orderId(orderId!!).build())
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
         callGetOrderById?.enqueue(ApolloCallback<GetOrderQuery.Data>(object : ApolloCall.Callback<GetOrderQuery.Data>() {
             override fun onResponse(response: Response<GetOrderQuery.Data>) {
                 if (response.data() != null) {
-                    setOrder(response.data()?.orderById)
+                    setOrder(response.data()?.orderById, scrollToEnd)
                 } else {
                     setOrder(null)
                 }
@@ -115,19 +115,21 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
                             .user(prefs.userId)
                             .text(text)
                             .build())
-                    .enqueue(null)
-
+                    .enqueue({
+                        getOrder(true)
+                    })
         }
     }
 
-
-
-    private fun setOrder(order: GetOrderQuery.OrderById?) {
+    private fun setOrder(order: GetOrderQuery.OrderById?, scrollToEnd : Boolean = false) {
         swipeRefreshLayout.isRefreshing = false
         info { "=====ORDER=====" }
         info { "$order" }
         info { "====================" }
         placeId = order!!.place()._id!!
         getAdapter().updateOrder(order!!)
+        if (scrollToEnd) {
+            rvOrder.scrollToPosition(getAdapter().itemCount - 1)
+        }
     }
 }
