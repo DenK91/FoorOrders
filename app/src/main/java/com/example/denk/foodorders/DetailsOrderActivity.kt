@@ -1,12 +1,13 @@
 package com.example.denk.foodorders
 
-import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
+import android.view.Menu
+import android.view.MenuItem
 import android.view.MotionEvent
-import android.view.View
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloCallback
 import com.apollographql.apollo.api.Response
@@ -15,6 +16,7 @@ import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import kotlinx.android.synthetic.main.activity_details_order.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
+import org.jetbrains.anko.intentFor
 
 class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
 
@@ -28,6 +30,22 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
     private var uiHandler = Handler(Looper.getMainLooper())
     private var callGetOrderById: ApolloCall<GetOrderQuery.Data>? = null
     private var orderId: String? = null
+    lateinit var placeId: String
+
+    override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        menuInflater.inflate(R.menu.menu_details_order, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
+        when (item?.itemId) {
+            R.id.create_suborder ->
+                startActivity(intentFor<CreateSuborderActivity>()
+                        .putExtra(CreateSuborderActivity.PLACE_ID, placeId))
+
+        }
+        return super.onOptionsItemSelected(item)
+    }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -102,11 +120,14 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
+
+
     private fun setOrder(order: GetOrderQuery.OrderById?) {
         swipeRefreshLayout.isRefreshing = false
         info { "=====ORDER=====" }
         info { "$order" }
         info { "====================" }
+        placeId = order!!.place()._id!!
         getAdapter().updateOrder(order!!)
     }
 }
