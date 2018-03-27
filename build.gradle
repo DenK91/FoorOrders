@@ -30,7 +30,10 @@ task clean(type: Delete) {
 }
 
 task preBuild(type: Exec) {
+    def envVars = getEnvironment()
+    envVars['PATH'] = envVars['PATH'] + ":/usr/local/bin"
     exec {
+        environment << envVars
         executable "sh"
         args "-c", "apollo-codegen download-schema http://192.168.88.13:8080/graphql --output ./app/src/main/graphql/com/example/denk/foodorders/schema.json"
     }
