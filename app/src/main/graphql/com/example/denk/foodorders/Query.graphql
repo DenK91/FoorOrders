@@ -34,6 +34,7 @@ query GetOrder($orderId: String!){
              last_name
          }
          place {
+            _id
             decription
          }
          date
@@ -64,6 +65,15 @@ mutation Comment($user: String!, $order: String!, $text: String!){
   commentOrder(user_id: $user, order_id: $order, text: $text)
 }
 
+query MenuByPlaceId($place: String!){
+  placeById(id: $place){
+    menu{
+      name
+      description
+      photo
+      price
+
+    }
 mutation CreateOrder($userId: String!, $placeId: String!) {
   createOrder(userId: $userId, placeId: $placeId)
 }
