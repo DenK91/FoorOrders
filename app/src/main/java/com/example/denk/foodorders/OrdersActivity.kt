@@ -16,6 +16,9 @@ import kotlinx.android.synthetic.main.activity_orders.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.sdk25.coroutines.onClick
+import android.support.v7.app.AlertDialog
+import org.jetbrains.anko.toast
 
 class OrdersActivity : AppCompatActivity(), AnkoLogger {
 
@@ -24,6 +27,8 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
 
     private var uiHandler = Handler(Looper.getMainLooper())
     private var callGetListOrders: ApolloCall<GetListOrdersQuery.Data>? = null
+    private var callPlacesQuery: ApolloCall<PlacesQuery.Data>? = null
+    private var callCreateOrderMutation: ApolloCall<CreateOrderMutation.Data>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,6 +42,7 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
                     .putExtra(DetailsOrderActivity.ORDER_ID_KEY, it._id))
         }
         swipeRefreshLayout.setOnRefreshListener { getOrders() }
+        btnAddOrder.onClick { showPlaces() }
     }
 
     override fun onResume() {
@@ -49,6 +55,8 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
     override fun onDestroy() {
         super.onDestroy()
         callGetListOrders?.cancel()
+        callPlacesQuery?.cancel()
+        callCreateOrderMutation?.cancel()
     }
 
     private fun setupToolbar() {
@@ -107,5 +115,58 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         }
         info { "====================" }
         getAdapter().updateOrders(orders)
+    }
+
+    private fun showPlaces() {
+        callPlacesQuery?.cancel()
+        callPlacesQuery = apolloClient.query(PlacesQuery.builder().build())
+                .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
+        callPlacesQuery?.enqueue(ApolloCallback<PlacesQuery.Data>(object : ApolloCall.Callback<PlacesQuery.Data>() {
+            override fun onResponse(response: Response<PlacesQuery.Data>) {
+                val places = response.data()?.places
+                if (places != null && places.isNotEmpty()) {
+                    val builderSingle = AlertDialog.Builder(this@OrdersActivity)
+                    builderSingle.setIcon(R.mipmap.ic_launcher)
+                    builderSingle.setTitle("Где заказывать?")
+
+                    val arrayAdapter = PlaceAdapter(this@OrdersActivity, places)
+
+                    builderSingle.setNegativeButton(android.R.string.cancel, { dialog, which -> dialog.dismiss() })
+                    builderSingle.setAdapter(arrayAdapter, { dialog, which ->
+                        val place = arrayAdapter.getItem(which)
+                        val builderInner = AlertDialog.Builder(this@OrdersActivity)
+                        builderInner.setMessage("${place.name}\n${place.decription}")
+                        builderInner.setTitle("Вы выбрали:")
+                        builderInner.setPositiveButton("Создать", {dialog, which->
+                            run {
+                                callCreateOrderMutation?.cancel()
+                                callCreateOrderMutation = apolloClient.mutate(CreateOrderMutation.builder()
+                                        .userId(prefs.userId).placeId(place._id!!).build())
+                                callCreateOrderMutation?.enqueue(ApolloCallback<CreateOrderMutation.Data>(object : ApolloCall.Callback<CreateOrderMutation.Data>() {
+                                    override fun onResponse(response: Response<CreateOrderMutation.Data>) {
+                                        if (response.data()?.createOrder!!) {
+                                            toast("Заказ создан успешно!")
+                                        }
+                                        dialog.dismiss()
+                                        getOrders()
+                                    }
+
+                                    override fun onFailure(e: ApolloException) {
+                                        dialog.dismiss()
+                                    }
+                                }, uiHandler))
+
+                            }
+                        })
+                        builderInner.show()
+                    })
+                    builderSingle.show()
+                }
+            }
+
+            override fun onFailure(e: ApolloException) {
+
+            }
+        }, uiHandler))
     }
 }

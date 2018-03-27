@@ -74,5 +74,16 @@ query MenuByPlaceId($place: String!){
       price
 
     }
+mutation CreateOrder($userId: String!, $placeId: String!) {
+  createOrder(userId: $userId, placeId: $placeId)
+}
+
+query Places {
+  places {
+    _id
+    name
+    decription
+    phone
+    site
   }
 }
