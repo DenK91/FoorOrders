@@ -28,3 +28,10 @@ allprojects {
 task clean(type: Delete) {
     delete rootProject.buildDir
 }
+
+task preBuild(type: Exec) {
+    exec {
+        executable "sh"
+        args "-c", "apollo-codegen download-schema http://192.168.88.13:8080/graphql --output ./app/src/main/graphql/com/example/denk/foodorders/schema.json"
+    }
+}
