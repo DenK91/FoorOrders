@@ -31,11 +31,11 @@ class PlaceAdapter(val ctx: Context, private val dataset: MutableList<PlacesQuer
             tvPlaceName.visibility = View.VISIBLE
             tvPlaceName.text = p.name
         }
-        if (TextUtils.isEmpty(p.decription)) {
+        if (TextUtils.isEmpty(p.description)) {
             tvPlaceDescription.visibility = View.GONE
         } else {
             tvPlaceDescription.visibility = View.VISIBLE
-            tvPlaceDescription.text = p.decription
+            tvPlaceDescription.text = p.description
         }
         if (TextUtils.isEmpty(p.phone)) {
             tvPhone.visibility = View.GONE

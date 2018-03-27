@@ -28,9 +28,9 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         get() = "dnek"
 
     private var uiHandler = Handler(Looper.getMainLooper())
-    private var callGetOrderById: ApolloCall<GetOrderQuery.Data>? = null
+    private var callGetOrderById: ApolloCall<OrderQuery.Data>? = null
     private var orderId: String? = null
-    lateinit var placeId: String
+    private lateinit var placeId: String
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_details_order, menu)
@@ -52,19 +52,19 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         setContentView(R.layout.activity_details_order)
 
         orderId = intent.getStringExtra(ORDER_ID_KEY)
+        info { orderId }
 
         setupToolbar()
         rvOrder.adapter = OrderAdapter()
         rvOrder.layoutManager = LinearLayoutManager(this)
         getAdapter().itemClickedListen {
-            info { it.place.decription }
+            info { it.place.description }
         }
-        etSend.setOnTouchListener{ v, event ->
+        etSend.setOnTouchListener{ _, event ->
             if(event.action == MotionEvent.ACTION_UP){
                 if(event.rawX >= (etSend.right - etSend.compoundDrawables[2].bounds.width())) {
                     sendComment(etSend.text.toString())
                     etSend.text.clear()
-                    true
                 }
             }
             false
@@ -90,12 +90,12 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
 
     private fun getOrder(scrollToEnd: Boolean = false) {
         callGetOrderById?.cancel()
-        callGetOrderById = apolloClient.query(GetOrderQuery.builder().orderId(orderId!!).build())
+        callGetOrderById = apolloClient.query(OrderQuery.builder().orderId(orderId!!).build())
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
-        callGetOrderById?.enqueue(ApolloCallback<GetOrderQuery.Data>(object : ApolloCall.Callback<GetOrderQuery.Data>() {
-            override fun onResponse(response: Response<GetOrderQuery.Data>) {
+        callGetOrderById?.enqueue(ApolloCallback<OrderQuery.Data>(object : ApolloCall.Callback<OrderQuery.Data>() {
+            override fun onResponse(response: Response<OrderQuery.Data>) {
                 if (response.data() != null) {
-                    setOrder(response.data()?.orderById, scrollToEnd)
+                    setOrder(response.data()?.order, scrollToEnd)
                 } else {
                     setOrder(null)
                 }
@@ -121,13 +121,13 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         }
     }
 
-    private fun setOrder(order: GetOrderQuery.OrderById?, scrollToEnd : Boolean = false) {
+    private fun setOrder(order: OrderQuery.Order?, scrollToEnd : Boolean = false) {
         swipeRefreshLayout.isRefreshing = false
         info { "=====ORDER=====" }
         info { "$order" }
         info { "====================" }
-        placeId = order!!.place()._id!!
-        getAdapter().updateOrder(order!!)
+        placeId = order!!.place()._id
+        getAdapter().updateOrder(order)
         if (scrollToEnd) {
             rvOrder.scrollToPosition(getAdapter().itemCount - 1)
         }

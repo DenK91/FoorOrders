@@ -9,7 +9,7 @@ import kotlinx.android.synthetic.main.item_product.*
 
 class ProductsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
-    var data: List<MenuByPlaceIdQuery.Menu> = emptyList()
+    var data: List<PlaceQuery.Product> = emptyList()
     set(value){
         field = value
         notifyDataSetChanged()
@@ -29,7 +29,7 @@ class ProductsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
     }
 
     class ProductHolder(override val containerView: View?) : RecyclerView.ViewHolder(containerView), LayoutContainer {
-        fun bind(menu: MenuByPlaceIdQuery.Menu){
+        fun bind(menu: PlaceQuery.Product){
             tvProductName.text = menu.name
             ivProductImage.load(menu.photo)
             tvProductPrice.text = menu.price.toInt().toCurrencyString()

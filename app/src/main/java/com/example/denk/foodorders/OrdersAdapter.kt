@@ -11,11 +11,11 @@ import java.util.*
 
 class OrdersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
-    private val dataset = emptyList<GetListOrdersQuery.Order>().toMutableList()
+    private val dataset = emptyList<OrdersQuery.Order>().toMutableList()
 
     override fun getItemCount(): Int = dataset.size
 
-    private lateinit var itemClickListener: (order: GetListOrdersQuery.Order) -> Unit
+    private lateinit var itemClickListener: (order: OrdersQuery.Order) -> Unit
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder =
             OrderHolder(parent?.context?.layoutInflater?.inflate(R.layout.item_order, parent, false)!!)
@@ -25,7 +25,7 @@ class OrdersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         (holder as? OrderHolder)?.bind(dataset[position])
     }
 
-    fun updateOrders(orders: List<GetListOrdersQuery.Order>?) {
+    fun updateOrders(orders: List<OrdersQuery.Order>?) {
         dataset.clear()
         if (orders != null && orders.isNotEmpty()) {
             dataset.addAll(orders)
@@ -33,15 +33,15 @@ class OrdersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         notifyDataSetChanged()
     }
 
-    fun itemClickedListen(event: (order: GetListOrdersQuery.Order) -> Unit) {
+    fun itemClickedListen(event: (order: OrdersQuery.Order) -> Unit) {
         itemClickListener = event
     }
 
     class OrderHolder(override val containerView: View?) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-        fun bind(order: GetListOrdersQuery.Order) {
-            tvOrderTitle.text = order.place.decription
-            tvAuthor.text = "${order.admin.first_name}  ${order.admin.last_name}"
+        fun bind(order: OrdersQuery.Order) {
+            tvOrderTitle.text = order.place.description
+            tvAuthor.text = "${order.user.first_name}  ${order.user.last_name}"
             tvTimestamp.text = order.date?.toDateString()
         }
     }

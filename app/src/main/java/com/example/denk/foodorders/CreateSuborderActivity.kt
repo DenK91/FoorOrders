@@ -34,15 +34,15 @@ class CreateSuborderActivity : AppCompatActivity(){
     }
 
     private fun getOrder() {
-        apolloClient.query(MenuByPlaceIdQuery.builder().place(placeId).build())
-                .enqueue({setMenu(it.data()?.placeById?.menu!!)})
+        apolloClient.query(PlaceQuery.builder().place(placeId).build())
+                .enqueue({setMenu(it.data()?.place?.products!!)})
     }
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
         return true
     }
-    private fun setMenu(menu: List<MenuByPlaceIdQuery.Menu>) {
+    private fun setMenu(menu: List<PlaceQuery.Product>) {
         (rvMenu.adapter as? ProductsAdapter)?.data = menu
     }
 }

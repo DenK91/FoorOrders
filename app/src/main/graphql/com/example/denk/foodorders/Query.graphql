@@ -1,8 +1,12 @@
-mutation GetUserId($aFirstName:String!, $aLastName:String!){
-  findOrCreateUser(firstName : $aFirstName, lastName : $aLastName)
+mutation User($aFirstName:String!, $aLastName:String!){
+  user(firstName : $aFirstName, lastName : $aLastName) {
+      _id
+      first_name
+      last_name
+  }
 }
 
-query GetUsers{
+query Users{
   users{
     _id
     first_name
@@ -10,37 +14,37 @@ query GetUsers{
   }
 }
 
-query GetListOrders{
+query Orders{
   orders {
     _id
     date
     state
-    admin {
+    user {
       _id
       first_name
       last_name
     }
     place {
       _id
-      decription
+      description
     }
   }
 }
 
-query GetOrder($orderId: String!){
- orderById(id: $orderId) {
-         admin {
+query Order($orderId: String!){
+ order(id: $orderId) {
+         user {
              first_name
              last_name
          }
          place {
             _id
-            decription
+            description
          }
          date
          state
-         suborders {
-            author {
+         subOrders {
+            user {
                 first_name
                 last_name
             }
@@ -53,7 +57,7 @@ query GetOrder($orderId: String!){
          }
          comments {
             text
-            author {
+            user {
                 first_name
                 last_name
             }
@@ -62,36 +66,37 @@ query GetOrder($orderId: String!){
 }
 
 mutation Comment($user: String!, $order: String!, $text: String!){
-  commentOrder(user_id: $user, order_id: $order, text: $text) {
-  text
-              author {
-                  first_name
-                  last_name
-              }
+  comment(user_id: $user, order_id: $order, text: $text) {
+      text
+      user {
+          first_name
+          last_name
+      }
   }
 }
 
-query MenuByPlaceId($place: String!){
-  placeById(id: $place){
-    menu{
+query Place($place: String!){
+  place(id: $place){
+    products{
       name
       description
       photo
       price
-
     }
   }
 }
 
 mutation CreateOrder($userId: String!, $placeId: String!) {
-  createOrder(userId: $userId, placeId: $placeId)
+  order(userId: $userId, placeId: $placeId) {
+      _id
+  }
 }
 
 query Places {
   places {
     _id
     name
-    decription
+    description
     phone
     site
   }

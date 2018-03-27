@@ -26,7 +26,7 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         get() = "dnek"
 
     private var uiHandler = Handler(Looper.getMainLooper())
-    private var callGetListOrders: ApolloCall<GetListOrdersQuery.Data>? = null
+    private var callGetListOrders: ApolloCall<OrdersQuery.Data>? = null
     private var callPlacesQuery: ApolloCall<PlacesQuery.Data>? = null
     private var callCreateOrderMutation: ApolloCall<CreateOrderMutation.Data>? = null
 
@@ -37,7 +37,7 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         rvOrders.adapter = OrdersAdapter()
         rvOrders.layoutManager = LinearLayoutManager(this)
         getAdapter().itemClickedListen {
-            info { it.place.decription }
+            info { it.place.description }
             startActivity(intentFor<DetailsOrderActivity>()
                     .putExtra(DetailsOrderActivity.ORDER_ID_KEY, it._id))
         }
@@ -90,10 +90,10 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
 
     private fun getOrders() {
         callGetListOrders?.cancel()
-        callGetListOrders = apolloClient.query(GetListOrdersQuery.builder().build())
+        callGetListOrders = apolloClient.query(OrdersQuery.builder().build())
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
-        callGetListOrders?.enqueue(ApolloCallback<GetListOrdersQuery.Data>(object : ApolloCall.Callback<GetListOrdersQuery.Data>() {
-            override fun onResponse(response: Response<GetListOrdersQuery.Data>) {
+        callGetListOrders?.enqueue(ApolloCallback<OrdersQuery.Data>(object : ApolloCall.Callback<OrdersQuery.Data>() {
+            override fun onResponse(response: Response<OrdersQuery.Data>) {
                 if (response.data() != null) {
                     setOrders(response.data()!!.orders)
                 } else {
@@ -107,11 +107,11 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         }, uiHandler))
     }
 
-    private fun setOrders(orders: List<GetListOrdersQuery.Order>?) {
+    private fun setOrders(orders: List<OrdersQuery.Order>?) {
         swipeRefreshLayout.isRefreshing = false
         info { "=====ORDES LIST=====" }
         orders?.forEach {
-            info { "${it.place.decription} ${it.admin.first_name} ${it.admin.last_name}" }
+            info { "${it.place.description} ${it.user.first_name} ${it.user.last_name}" }
         }
         info { "====================" }
         getAdapter().updateOrders(orders)
@@ -135,7 +135,7 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
                     builderSingle.setAdapter(arrayAdapter, { _, which ->
                         val place = arrayAdapter.getItem(which)
                         val builderInner = AlertDialog.Builder(this@OrdersActivity)
-                        builderInner.setMessage("${place.name}\n${place.decription}")
+                        builderInner.setMessage("${place.name}\n${place.description}")
                         builderInner.setTitle("Вы выбрали:")
                         builderInner.setPositiveButton("Создать", {dialog, _->
                             run {
@@ -146,7 +146,7 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
                                     override fun onResponse(response: Response<CreateOrderMutation.Data>) {
                                         dialog.dismiss()
                                         startActivity(intentFor<DetailsOrderActivity>()
-                                                .putExtra(DetailsOrderActivity.ORDER_ID_KEY, response.data()?.createOrder))
+                                                .putExtra(DetailsOrderActivity.ORDER_ID_KEY, response.data()?.order!!._id))
                                         toast("Заказ создан успешно!")
                                     }
 

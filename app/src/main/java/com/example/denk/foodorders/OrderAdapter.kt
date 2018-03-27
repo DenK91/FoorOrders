@@ -9,18 +9,16 @@ import kotlinx.android.synthetic.main.item_order.*
 import kotlinx.android.synthetic.main.item_suborder.*
 import org.jetbrains.anko.layoutInflater
 import java.text.NumberFormat
-import java.text.SimpleDateFormat
-import java.util.*
 
 class OrderAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     enum class ViewType{ HEADER, COMMENT, SUBORDER}
 
-    private var order : GetOrderQuery.OrderById? = null
+    private var order : OrderQuery.Order? = null
 
-    override fun getItemCount(): Int = order?.let { return 1 + (it.suborders?.size ?: 0) + (it.comments?.size ?: 0) } ?: 0
+    override fun getItemCount(): Int = order?.let { return 1 + (it.subOrders?.size ?: 0) + (it.comments?.size ?: 0) } ?: 0
 
-    private lateinit var itemClickListener: (order: GetOrderQuery.OrderById) -> Unit
+    private lateinit var itemClickListener: (order: OrderQuery.Order) -> Unit
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder{
         when(viewType){
@@ -40,7 +38,7 @@ class OrderAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         }
     }
 
-    fun subordersEnd(): Int = (order?.suborders?.size ?: 0)
+    fun subordersEnd(): Int = (order?.subOrders?.size ?: 0)
 
 
     override fun getItemViewType(position: Int): Int {
@@ -54,41 +52,41 @@ class OrderAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder){
             is OrderHolder -> order?.let{holder.bind(it)}
-            is SubOrderHolder -> order?.suborders?.get(position - 1)?.let { holder.bind(it) }
+            is SubOrderHolder -> order?.subOrders?.get(position - 1)?.let { holder.bind(it) }
             is CommentHolder -> order?.comments?.get(position - 1 - subordersEnd())?.let { holder.bind(it) }
         }
     }
 
-    fun updateOrder(order: GetOrderQuery.OrderById) {
+    fun updateOrder(order: OrderQuery.Order) {
         this.order = order
         notifyDataSetChanged()
     }
 
-    fun itemClickedListen(event: (order: GetOrderQuery.OrderById) -> Unit) {
+    fun itemClickedListen(event: (order: OrderQuery.Order) -> Unit) {
         itemClickListener = event
     }
 
     class OrderHolder(override val containerView: View?) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-        fun bind(order: GetOrderQuery.OrderById) {
-            tvOrderTitle.text = order.place.decription
-            tvAuthor.text = "${order.admin.first_name}  ${order.admin.last_name}"
+        fun bind(order: OrderQuery.Order) {
+            tvOrderTitle.text = order.place.description
+            tvAuthor.text = "${order.user.first_name}  ${order.user.last_name}"
             tvTimestamp.text = order.date?.toDateString()
         }
     }
 
     class SubOrderHolder(override val containerView: View?) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-        fun bind(suborder: GetOrderQuery.Suborder) {
-            tvSuborderAuthor.text = "${suborder.author.first_name}  ${suborder.author.last_name}"
+        fun bind(suborder: OrderQuery.SubOrder) {
+            tvSuborderAuthor.text = "${suborder.user.first_name}  ${suborder.user.last_name}"
             tvSuborderSum.text = "${NumberFormat.getCurrencyInstance().format(suborder.products?.sumBy { it.price.toInt() })} "
         }
     }
 
     class CommentHolder(override val containerView: View?) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-        fun bind(comment: GetOrderQuery.Comment) {
-            tvCommentAuthor.text = "${comment.author?.first_name}  ${comment.author?.last_name}"
+        fun bind(comment: OrderQuery.Comment) {
+            tvCommentAuthor.text = "${comment.user?.first_name}  ${comment.user?.last_name}"
             tvComment.text = comment.text
         }
     }

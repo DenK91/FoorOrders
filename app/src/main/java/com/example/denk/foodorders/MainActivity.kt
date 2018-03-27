@@ -23,7 +23,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
         get() = "dnek"
 
     var uiHandler = Handler(Looper.getMainLooper())
-    var callGetUserId : ApolloMutationCall<GetUserIdMutation.Data>? = null
+    var callGetUserId : ApolloMutationCall<UserMutation.Data>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,13 +37,13 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
 
         btnLogin.onClick {
             callGetUserId?.cancel()
-            callGetUserId = apolloClient.mutate(GetUserIdMutation.builder()
+            callGetUserId = apolloClient.mutate(UserMutation.builder()
                     .aFirstName(etFirstName.text.toString())
                     .aLastName(etLastName.text.toString())
                     .build())
-            callGetUserId?.enqueue(ApolloCallback<GetUserIdMutation.Data>(object : ApolloCall.Callback<GetUserIdMutation.Data>() {
-                        override fun onResponse(response: Response<GetUserIdMutation.Data>) {
-                            val userId = response.data()?.findOrCreateUser
+            callGetUserId?.enqueue(ApolloCallback<UserMutation.Data>(object : ApolloCall.Callback<UserMutation.Data>() {
+                        override fun onResponse(response: Response<UserMutation.Data>) {
+                            val userId = response.data()?.user!!._id
                             if (!TextUtils.isEmpty(userId)) {
                                 prefs.userId = userId!!
                                 info { "from server ${prefs.userId}" }
@@ -55,7 +55,7 @@ class MainActivity : AppCompatActivity(), AnkoLogger {
                         }
 
                         override fun onFailure(e: ApolloException) {
-
+                            info { e }
                         }
 
                     }, uiHandler))
