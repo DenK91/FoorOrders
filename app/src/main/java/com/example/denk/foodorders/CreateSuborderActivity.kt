@@ -1,8 +1,6 @@
 package com.example.denk.foodorders
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
@@ -12,6 +10,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.apollographql.apollo.api.Input
+import com.example.denk.foodorders.adapters.ProductsAdapter
 import kotlinx.android.synthetic.main.activity_create_suborder.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
@@ -19,19 +18,18 @@ import org.jetbrains.anko.sdk25.coroutines.onClick
 class CreateSuborderActivity : AppCompatActivity(){
 
     companion object {
-        val PLACE_ID = "place_id"
-        val ORDER_ID = "order_id"
+        const val PLACE_ID = "place_id"
+        const val ORDER_ID = "order_id"
     }
 
     private lateinit var placeId : String
     private lateinit var orderId: String
-    val uiHandler = Handler(Looper.getMainLooper())
 
     val purchaseItems = arrayListOf<String>()
-    val purchaseAdapter = object : BaseAdapter() {
+    private val purchaseAdapter = object : BaseAdapter() {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val itemId = getItem(position)
-            var itemName = getAdapter().data.first { it._id.equals(itemId) }.name
+            val itemName = getAdapter().data.first { it._id == itemId }.name
             val v = layoutInflater.inflate(android.R.layout.simple_list_item_1, parent, false)
             v.findViewById<TextView>(android.R.id.text1).text = itemName
             return v
@@ -47,8 +45,6 @@ class CreateSuborderActivity : AppCompatActivity(){
         menuInflater.inflate(R.menu.menu_create_suborder, menu)
         return true
     }
-
-
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -106,7 +102,8 @@ class CreateSuborderActivity : AppCompatActivity(){
         onBackPressed()
         return true
     }
+
     private fun setMenu(menu: List<PlaceQuery.Product>) {
-        getAdapter()?.data = menu
+        getAdapter().data = menu
     }
 }
