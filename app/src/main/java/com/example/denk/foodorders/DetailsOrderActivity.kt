@@ -9,9 +9,6 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import com.apollographql.apollo.ApolloCall
-import com.apollographql.apollo.ApolloCallback
-import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import kotlinx.android.synthetic.main.activity_details_order.*
 import org.jetbrains.anko.AnkoLogger
@@ -41,7 +38,8 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         when (item?.itemId) {
             R.id.create_suborder ->
                 startActivity(intentFor<CreateSuborderActivity>()
-                        .putExtra(CreateSuborderActivity.PLACE_ID, placeId))
+                        .putExtra(CreateSuborderActivity.PLACE_ID, placeId)
+                        .putExtra(CreateSuborderActivity.ORDER_ID, orderId))
 
         }
         return super.onOptionsItemSelected(item)
@@ -92,32 +90,13 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         callGetOrderById?.cancel()
         callGetOrderById = apolloClient.query(OrderQuery.builder().orderId(orderId!!).build())
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
-        callGetOrderById?.enqueue(ApolloCallback<OrderQuery.Data>(object : ApolloCall.Callback<OrderQuery.Data>() {
-            override fun onResponse(response: Response<OrderQuery.Data>) {
-                if (response.data() != null) {
-                    setOrder(response.data()?.order, scrollToEnd)
-                } else {
-                    setOrder(null)
-                }
-            }
-
-            override fun onFailure(e: ApolloException) {
-                setOrder(null)
-            }
-        }, uiHandler))
+        callGetOrderById?.enqueue({ setOrder(it.data()?.order, scrollToEnd) })
     }
 
     private fun sendComment(text: String){
         if(!text.isEmpty()){
-            apolloClient.mutate(
-                    CommentMutation.builder()
-                            .order(orderId!!)
-                            .user(prefs.userId)
-                            .text(text)
-                            .build())
-                    .enqueue({
-                        getOrder(true)
-                    })
+            apolloClient.mutate(CommentMutation(prefs.userId, orderId!!, text))
+                    .enqueue({getOrder(true)})
         }
     }
 

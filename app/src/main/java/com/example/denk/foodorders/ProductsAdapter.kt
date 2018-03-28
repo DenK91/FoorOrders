@@ -9,6 +9,7 @@ import kotlinx.android.synthetic.main.item_product.*
 
 class ProductsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
+    private lateinit var itemClickListener: (product: PlaceQuery.Product) -> Unit
     var data: List<PlaceQuery.Product> = emptyList()
     set(value){
         field = value
@@ -17,7 +18,9 @@ class ProductsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
 
     override fun onCreateViewHolder(parent: ViewGroup?, viewType: Int): RecyclerView.ViewHolder {
         val v = LayoutInflater.from(parent!!.context).inflate(R.layout.item_product, parent, false)
-        return ProductHolder(v)
+        return ProductHolder(v).listen {
+            itemClickListener.invoke(data[it])
+        }
     }
 
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder?, position: Int) {
@@ -35,5 +38,9 @@ class ProductsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>(){
             tvProductPrice.text = menu.price.toInt().toCurrencyString()
             tvProductDescription.text = menu.description
         }
+    }
+
+    fun itemClickedListen(event: (product: PlaceQuery.Product) -> Unit) {
+        itemClickListener = event
     }
 }
