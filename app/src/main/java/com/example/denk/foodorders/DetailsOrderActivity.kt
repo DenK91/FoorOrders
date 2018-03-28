@@ -76,6 +76,10 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
             false
         }
         swipeRefreshLayout.setOnRefreshListener { getOrder() }
+    }
+
+    override fun onResume() {
+        super.onResume()
         getOrder()
     }
 

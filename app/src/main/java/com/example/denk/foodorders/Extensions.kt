@@ -1,6 +1,5 @@
 package com.example.denk.foodorders
 
-import android.animation.Animator
 import android.graphics.Bitmap
 import android.graphics.Rect
 import android.graphics.drawable.BitmapDrawable
@@ -17,9 +16,7 @@ import com.apollographql.apollo.ApolloCallback
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.squareup.picasso.Picasso
-import kotlinx.android.synthetic.main.activity_create_suborder.*
 import org.jetbrains.anko.image
-import org.jetbrains.anko.info
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*

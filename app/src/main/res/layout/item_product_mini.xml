@@ -30,7 +30,6 @@
             android:layout_marginEnd="8dp"
             android:layout_marginStart="8dp"
             android:layout_toEndOf="@+id/ivProductImage"
-            android:layout_toStartOf="@+id/controlsContainer"
             android:gravity="center_vertical"
             android:orientation="vertical">
 
@@ -69,16 +68,6 @@
                 android:lines="1"
                 android:ellipsize="end"
                 tools:text="Состав: фарш из курицы – 180 г, сыр - 20 г, лук репка - 15 г, петрушка - 5 г, соус - 40 г, лаваш - 100 г" />
-        </LinearLayout>
-
-        <LinearLayout
-            android:id="@+id/controlsContainer"
-            android:layout_width="50dp"
-            android:layout_height="wrap_content"
-            android:layout_alignParentEnd="true"
-            android:layout_centerVertical="true"
-            android:orientation="horizontal">
-
         </LinearLayout>
 
     </RelativeLayout>
