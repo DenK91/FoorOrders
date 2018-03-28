@@ -1,8 +1,6 @@
 package com.example.denk.foodorders
 
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.support.v7.app.AppCompatActivity
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
@@ -24,12 +22,13 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
     override val loggerTag: String
         get() = "dnek"
 
-    private var uiHandler = Handler(Looper.getMainLooper())
     private var callGetOrderById: ApolloCall<OrderQuery.Data>? = null
     private var orderId: String? = null
     private lateinit var placeId: String
+    private var optionsMenu : Menu? = null
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
+        optionsMenu = menu
         menuInflater.inflate(R.menu.menu_details_order, menu)
         return true
     }
@@ -58,9 +57,9 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         getAdapter().itemClickedListen {
             info { it.place.description }
         }
-        etSend.setOnTouchListener{ _, event ->
-            if(event.action == MotionEvent.ACTION_UP){
-                if(event.rawX >= (etSend.right - etSend.compoundDrawables[2].bounds.width())) {
+        etSend.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                if (event.rawX >= (etSend.right - etSend.compoundDrawables[2].bounds.width())) {
                     sendComment(etSend.text.toString())
                     etSend.text.clear()
                 }
@@ -93,14 +92,14 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         callGetOrderById?.enqueue({ setOrder(it.data()?.order, scrollToEnd) })
     }
 
-    private fun sendComment(text: String){
-        if(!text.isEmpty()){
+    private fun sendComment(text: String) {
+        if (!text.isEmpty()) {
             apolloClient.mutate(CommentMutation(prefs.userId, orderId!!, text))
                     .enqueue({getOrder(true)})
         }
     }
 
-    private fun setOrder(order: OrderQuery.Order?, scrollToEnd : Boolean = false) {
+    private fun setOrder(order: OrderQuery.Order?, scrollToEnd: Boolean = false) {
         swipeRefreshLayout.isRefreshing = false
         info { "=====ORDER=====" }
         info { "$order" }
@@ -110,5 +109,6 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         if (scrollToEnd) {
             rvOrder.scrollToPosition(getAdapter().itemCount - 1)
         }
+        optionsMenu?.findItem(R.id.create_suborder)?.isVisible = order.subOrders?.none { prefs.userId == it.user._id }!!
     }
 }

@@ -45,6 +45,7 @@ query Order($orderId: String!){
          state
          subOrders {
             user {
+                _id
                 first_name
                 last_name
             }
