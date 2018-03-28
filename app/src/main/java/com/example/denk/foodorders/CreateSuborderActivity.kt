@@ -1,5 +1,7 @@
 package com.example.denk.foodorders
 
+import android.graphics.drawable.Drawable
+import android.graphics.drawable.LayerDrawable
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
@@ -12,6 +14,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.apollographql.apollo.api.Input
+import com.example.denk.foodorders.views.CounterDrawable
 import kotlinx.android.synthetic.main.activity_create_suborder.*
 import org.jetbrains.anko.*
 import org.jetbrains.anko.sdk25.coroutines.onClick
@@ -45,6 +48,8 @@ class CreateSuborderActivity : AppCompatActivity(){
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_create_suborder, menu)
+        val cart = menu?.findItem(R.id.shopping_cart);
+        cart?.icon?.setCount(purchaseItems.size)
         return true
     }
 
@@ -61,6 +66,10 @@ class CreateSuborderActivity : AppCompatActivity(){
         rvMenu.layoutManager = LinearLayoutManager(this)
         getAdapter().itemClickedListen {
             purchaseItems.add(it._id)
+            //do some animations
+            val index = getAdapter().data.indexOf(it)
+            val itemView = rvMenu.layoutManager.findViewByPosition(index)
+            itemView.animOut{invalidateOptionsMenu()}
         }
         getOrder()
     }
@@ -108,5 +117,15 @@ class CreateSuborderActivity : AppCompatActivity(){
     }
     private fun setMenu(menu: List<PlaceQuery.Product>) {
         getAdapter()?.data = menu
+    }
+
+
+    private fun Drawable.setCount(count: Int){
+        val bg = this as? LayerDrawable
+        bg?.apply {
+            val drawable = (findDrawableByLayerId(R.id.dCounter) as? CounterDrawable) ?: CounterDrawable(applicationContext)
+            drawable.count = count.toString()
+            setDrawableByLayerId(R.id.dCounter, drawable)
+        }
     }
 }
