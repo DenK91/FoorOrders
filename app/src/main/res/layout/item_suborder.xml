@@ -24,8 +24,9 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="center_vertical"
+                android:padding="8dp"
                 android:textColor="@color/black"
-                android:textSize="14sp"
+                android:textSize="16sp"
                 android:textStyle="bold"
                 tools:text="Вася Пупкин" />
 
@@ -33,6 +34,7 @@
                 android:id="@+id/tvSuborderSum"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:padding="8dp"
                 android:textColor="@color/black"
                 android:textSize="18sp"
                 android:textStyle="italic"
