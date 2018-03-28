@@ -1,15 +1,25 @@
 package com.example.denk.foodorders
 
+import android.animation.Animator
+import android.graphics.Bitmap
+import android.graphics.Rect
+import android.graphics.drawable.BitmapDrawable
 import android.os.Handler
 import android.os.Looper
 import android.support.v7.widget.RecyclerView
 import android.text.TextUtils
+import android.view.View
+import android.view.ViewGroup
+import android.widget.FrameLayout
 import android.widget.ImageView
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.ApolloCallback
 import com.apollographql.apollo.api.Response
 import com.apollographql.apollo.exception.ApolloException
 import com.squareup.picasso.Picasso
+import kotlinx.android.synthetic.main.activity_create_suborder.*
+import org.jetbrains.anko.image
+import org.jetbrains.anko.info
 import java.text.NumberFormat
 import java.text.SimpleDateFormat
 import java.util.*
@@ -53,4 +63,34 @@ fun ImageView.load(url: String?){
                 .centerCrop()
                 .into(this)
     }
+}
+
+fun View.animOut(scale: Float = 0.1f, duration: Long = 300, callback: ()->Unit = {}){
+    val rootLayout = rootView as ViewGroup
+    isDrawingCacheEnabled = true
+    buildDrawingCache()
+    val bitmap = Bitmap.createBitmap(getDrawingCache())
+    destroyDrawingCache()
+
+    val offset = Rect()
+    val size = Rect()
+    getDrawingRect(size)
+    getGlobalVisibleRect(offset)
+    val imageView = ImageView(context)
+    imageView.image = BitmapDrawable(resources, bitmap)
+    rootLayout.addView(imageView, FrameLayout.LayoutParams(size.width(), size.height())
+            .apply { leftMargin = offset.left; topMargin = offset.top })
+
+    imageView.animate()
+            .scaleX(scale)
+            .scaleY(scale)
+            .translationX((size.width()*(1-scale).times(0.5)).toFloat())
+            .translationY((offset.top + size.height().times(0.5 + scale)).toFloat().unaryMinus())
+            .setDuration(duration)
+            .alpha(0.1f)
+            .withEndAction {
+                rootLayout.removeView(imageView)
+                bitmap?.recycle()
+                callback.invoke()
+            }
 }
