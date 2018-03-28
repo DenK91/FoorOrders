@@ -75,9 +75,16 @@ mutation Comment($user: String!, $order: String!, $text: String!){
   }
 }
 
+mutation SubOrder($user:String!, $order: String!, $products: [String]){
+  subOrder(userId: $user, orderId: $order, products: $products){
+    _id
+  }
+}
+
 query Place($place: String!){
   place(id: $place){
     products{
+      _id
       name
       description
       photo
