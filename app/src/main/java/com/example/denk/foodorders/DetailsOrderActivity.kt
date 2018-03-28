@@ -56,7 +56,15 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         rvOrder.adapter = OrderAdapter()
         rvOrder.layoutManager = LinearLayoutManager(this)
         getAdapter().itemClickedListen {
+
             info { it.place.description }
+        }
+        getAdapter().subOrderClickedListen {
+            if (it.user._id == prefs.userId) {
+                startActivity(intentFor<CreateSuborderActivity>()
+                        .putExtra(CreateSuborderActivity.PLACE_ID, placeId)
+                        .putExtra(CreateSuborderActivity.ORDER_ID, orderId))
+            }
         }
         etSend.setOnTouchListener { _, event ->
             if (event.action == MotionEvent.ACTION_UP) {
