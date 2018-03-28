@@ -5,9 +5,9 @@ import android.content.SharedPreferences
 import android.text.TextUtils
 
 class Prefs (context: Context) {
-    val PREFS_FILENAME = "com.example.denk.foodorders.prefs"
-    val USER_ID = "user_id"
-    val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0);
+    private val PREFS_FILENAME = "com.example.denk.foodorders.prefs"
+    private val USER_ID = "user_id"
+    private val prefs: SharedPreferences = context.getSharedPreferences(PREFS_FILENAME, 0)
 
     var userId: String
         get() = prefs.getString(USER_ID, "")

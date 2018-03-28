@@ -2,15 +2,10 @@ package com.example.denk.foodorders
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
-import android.os.Handler
-import android.os.Looper
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
 import com.apollographql.apollo.ApolloCall
-import com.apollographql.apollo.ApolloCallback
-import com.apollographql.apollo.api.Response
-import com.apollographql.apollo.exception.ApolloException
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import kotlinx.android.synthetic.main.activity_orders.*
 import org.jetbrains.anko.AnkoLogger
@@ -18,6 +13,8 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import android.support.v7.app.AlertDialog
+import com.example.denk.foodorders.adapters.OrdersAdapter
+import com.example.denk.foodorders.adapters.PlaceAdapter
 import org.jetbrains.anko.toast
 
 class OrdersActivity : AppCompatActivity(), AnkoLogger {
@@ -25,7 +22,6 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
     override val loggerTag: String
         get() = "dnek"
 
-    private var uiHandler = Handler(Looper.getMainLooper())
     private var callGetListOrders: ApolloCall<OrdersQuery.Data>? = null
     private var callPlacesQuery: ApolloCall<PlacesQuery.Data>? = null
     private var callCreateOrderMutation: ApolloCall<CreateOrderMutation.Data>? = null
@@ -92,19 +88,15 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         callGetListOrders?.cancel()
         callGetListOrders = apolloClient.query(OrdersQuery.builder().build())
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
-        callGetListOrders?.enqueue(ApolloCallback<OrdersQuery.Data>(object : ApolloCall.Callback<OrdersQuery.Data>() {
-            override fun onResponse(response: Response<OrdersQuery.Data>) {
-                if (response.data() != null) {
-                    setOrders(response.data()!!.orders)
-                } else {
-                    setOrders(null)
-                }
-            }
-
-            override fun onFailure(e: ApolloException) {
+        callGetListOrders?.enqueue({
+            if (it.data() != null) {
+                setOrders(it.data()!!.orders)
+            } else {
                 setOrders(null)
             }
-        }, uiHandler))
+        }, {
+            setOrders(null)
+        })
     }
 
     private fun setOrders(orders: List<OrdersQuery.Order>?) {
@@ -121,51 +113,40 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         callPlacesQuery?.cancel()
         callPlacesQuery = apolloClient.query(PlacesQuery.builder().build())
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
-        callPlacesQuery?.enqueue(ApolloCallback<PlacesQuery.Data>(object : ApolloCall.Callback<PlacesQuery.Data>() {
-            override fun onResponse(response: Response<PlacesQuery.Data>) {
-                val places = response.data()?.places
-                if (places != null && places.isNotEmpty()) {
-                    val builderSingle = AlertDialog.Builder(this@OrdersActivity)
-                    builderSingle.setIcon(R.mipmap.ic_launcher)
-                    builderSingle.setTitle("Где заказывать?")
+        callPlacesQuery?.enqueue({
+            val places = it.data()?.places
+            if (places != null && places.isNotEmpty()) {
+                val builderSingle = AlertDialog.Builder(this@OrdersActivity)
+                builderSingle.setIcon(R.mipmap.ic_launcher)
+                builderSingle.setTitle("Где заказывать?")
 
-                    val arrayAdapter = PlaceAdapter(this@OrdersActivity, places)
+                val arrayAdapter = PlaceAdapter(this@OrdersActivity, places)
 
-                    builderSingle.setNegativeButton(android.R.string.cancel, { dialog, _ -> dialog.dismiss() })
-                    builderSingle.setAdapter(arrayAdapter, { _, which ->
-                        val place = arrayAdapter.getItem(which)
-                        val builderInner = AlertDialog.Builder(this@OrdersActivity)
-                        builderInner.setMessage("${place.name}\n${place.description}")
-                        builderInner.setTitle("Вы выбрали:")
-                        builderInner.setPositiveButton("Создать", {dialog, _->
-                            run {
-                                callCreateOrderMutation?.cancel()
-                                callCreateOrderMutation = apolloClient.mutate(CreateOrderMutation.builder()
-                                        .userId(prefs.userId).placeId(place._id!!).build())
-                                callCreateOrderMutation?.enqueue(ApolloCallback<CreateOrderMutation.Data>(object : ApolloCall.Callback<CreateOrderMutation.Data>() {
-                                    override fun onResponse(response: Response<CreateOrderMutation.Data>) {
-                                        dialog.dismiss()
-                                        startActivity(intentFor<DetailsOrderActivity>()
-                                                .putExtra(DetailsOrderActivity.ORDER_ID_KEY, response.data()?.order!!._id))
-                                        toast("Заказ создан успешно!")
-                                    }
-
-                                    override fun onFailure(e: ApolloException) {
-                                        dialog.dismiss()
-                                    }
-                                }, uiHandler))
-
-                            }
-                        })
-                        builderInner.show()
+                builderSingle.setNegativeButton(android.R.string.cancel, { dialog, _ -> dialog.dismiss() })
+                builderSingle.setAdapter(arrayAdapter, { _, which ->
+                    val place = arrayAdapter.getItem(which)
+                    val builderInner = AlertDialog.Builder(this@OrdersActivity)
+                    builderInner.setMessage("${place.name}\n${place.description}")
+                    builderInner.setTitle("Вы выбрали:")
+                    builderInner.setPositiveButton("Создать", { dialog, _ ->
+                        run {
+                            callCreateOrderMutation?.cancel()
+                            callCreateOrderMutation = apolloClient.mutate(CreateOrderMutation.builder()
+                                    .userId(prefs.userId).placeId(place._id).build())
+                            callCreateOrderMutation?.enqueue({
+                                dialog.dismiss()
+                                startActivity(intentFor<DetailsOrderActivity>()
+                                        .putExtra(DetailsOrderActivity.ORDER_ID_KEY, it.data()?.order!!._id))
+                                toast("Заказ создан успешно!")
+                            }, {
+                                dialog.dismiss()
+                            })
+                        }
                     })
-                    builderSingle.show()
-                }
+                    builderInner.show()
+                })
+                builderSingle.show()
             }
-
-            override fun onFailure(e: ApolloException) {
-
-            }
-        }, uiHandler))
+        })
     }
 }

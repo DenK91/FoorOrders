@@ -8,6 +8,7 @@ import android.view.MenuItem
 import android.view.MotionEvent
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
+import com.example.denk.foodorders.adapters.OrderAdapter
 import kotlinx.android.synthetic.main.activity_details_order.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
