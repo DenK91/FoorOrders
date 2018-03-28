@@ -19,6 +19,12 @@
             tools:listitem="@layout/item_order"/>
 
     </android.support.v4.widget.SwipeRefreshLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="@color/colorPrimary"/>
+
     <EditText
         android:id="@+id/etSend"
         android:paddingStart="8dp"
