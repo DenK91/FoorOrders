@@ -11,7 +11,7 @@ import kotlinx.android.synthetic.main.item_product.*
 class ProductsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private lateinit var itemClickListener: (product: PlaceQuery.Product) -> Unit
-    var data: List<PlaceQuery.Product> = emptyList()
+    var data: MutableList<PlaceQuery.Product> = mutableListOf()
         set(value) {
             field = value
             notifyDataSetChanged()
@@ -43,5 +43,13 @@ class ProductsAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     fun itemClickedListen(event: (product: PlaceQuery.Product) -> Unit) {
         itemClickListener = event
+    }
+
+    fun remove(product: PlaceQuery.Product) {
+        val pos = data.indexOf(product)
+        if (pos != -1) {
+            data.remove(product)
+            notifyItemRemoved(pos)
+        }
     }
 }

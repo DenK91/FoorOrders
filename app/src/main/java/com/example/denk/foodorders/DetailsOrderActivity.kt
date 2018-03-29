@@ -13,6 +13,7 @@ import kotlinx.android.synthetic.main.activity_details_order.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
 import org.jetbrains.anko.intentFor
+import java.util.ArrayList
 
 class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
 
@@ -40,7 +41,6 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
                 startActivity(intentFor<CreateSuborderActivity>()
                         .putExtra(CreateSuborderActivity.PLACE_ID, placeId)
                         .putExtra(CreateSuborderActivity.ORDER_ID, orderId))
-
         }
         return super.onOptionsItemSelected(item)
     }
@@ -61,9 +61,13 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         }
         getAdapter().subOrderClickedListen {
             if (it.user._id == prefs.userId) {
-                startActivity(intentFor<CreateSuborderActivity>()
-                        .putExtra(CreateSuborderActivity.PLACE_ID, placeId)
-                        .putExtra(CreateSuborderActivity.ORDER_ID, orderId))
+                val products : ArrayList<String> = ArrayList()
+                it.products?.forEach { products.add(it._id) }
+                startActivity(intentFor<SubOrderActivity>()
+                        .putExtra(SubOrderActivity.PLACE_ID, placeId)
+                        .putExtra(SubOrderActivity.ORDER_ID, orderId)
+                        .putExtra(SubOrderActivity.SUB_ORDER_ID, it._id)
+                        .putExtra(SubOrderActivity.PRODUCTS_ID, products))
             }
         }
         etSend.setOnTouchListener { _, event ->

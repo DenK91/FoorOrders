@@ -16,23 +16,26 @@ import com.example.denk.foodorders.adapters.ProductsAdapter
 import com.example.denk.foodorders.views.CounterDrawable
 import kotlinx.android.synthetic.main.activity_create_suborder.*
 import org.jetbrains.anko.*
-import org.jetbrains.anko.sdk25.coroutines.onClick
 
-class CreateSuborderActivity : AppCompatActivity(){
+class CreateSuborderActivity : AppCompatActivity() {
 
     companion object {
         const val PLACE_ID = "place_id"
         const val ORDER_ID = "order_id"
+        const val SUB_ORDER_ID = "sub_order_id"
+        const val PRODUCTS_ID = "products_id"
     }
 
-    private lateinit var placeId : String
+    private lateinit var placeId: String
     private lateinit var orderId: String
-
-    val purchaseItems = arrayListOf<String>()
+    private var subOrderId: String? = null
+    private lateinit var allProducts: List<PlaceQuery.Product>
+    private var purchaseItems = arrayListOf<String>()
+    private var cart: MenuItem? = null
     private val purchaseAdapter = object : BaseAdapter() {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val itemId = getItem(position)
-            val itemName = getAdapter().data.first { it._id == itemId }.name
+            val itemName = allProducts.first { it._id == itemId }.name
             val v = layoutInflater.inflate(android.R.layout.simple_list_item_1, parent, false)
             v.findViewById<TextView>(android.R.id.text1).text = itemName
             return v
@@ -46,8 +49,13 @@ class CreateSuborderActivity : AppCompatActivity(){
 
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.menu_create_suborder, menu)
-        val cart = menu?.findItem(R.id.shopping_cart);
-        cart?.icon?.setCount(purchaseItems.size)
+        cart = menu?.findItem(R.id.shopping_cart)
+        if (subOrderId != null) {
+            cart?.isVisible = true
+            cart?.icon?.setCount(purchaseItems.size)
+        } else {
+            cart?.isVisible = false
+        }
         return true
     }
 
@@ -56,55 +64,63 @@ class CreateSuborderActivity : AppCompatActivity(){
         setContentView(R.layout.activity_create_suborder)
         placeId = intent.getStringExtra(PLACE_ID)
         orderId = intent.getStringExtra(ORDER_ID)
+        val subOrder = intent.getStringExtra(SUB_ORDER_ID)
+        if (subOrder != null) {
+            subOrderId = subOrder
+        }
+        val products = intent.getStringArrayListExtra(PRODUCTS_ID)
+        if (products != null && !products.isEmpty()) {
+            purchaseItems = products
+        }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         rvMenu.adapter = ProductsAdapter()
         rvMenu.layoutManager = LinearLayoutManager(this)
         getAdapter().itemClickedListen {
+            if (purchaseItems.isEmpty()) {
+                apolloClient.mutate(SubOrderMutation(prefs.userId, orderId, Input.fromNullable(listOf(it._id))))
+                        .enqueue({
+                            subOrderId = it.data()?.subOrder?._id
+                            cart?.isVisible = true
+                            invalidateOptionsMenu()
+                        })
+            } else {
+                apolloClient.mutate(EditSubOrderMutation(subOrderId!!, Input.fromNullable(purchaseItems)))
+                        .enqueue({})
+            }
             purchaseItems.add(it._id)
             //do some animations
             val index = getAdapter().data.indexOf(it)
             val itemView = rvMenu.layoutManager.findViewByPosition(index)
-            itemView.animOut{invalidateOptionsMenu()}
+            itemView.animOut { invalidateOptionsMenu() }
+            getAdapter().remove(it)
         }
         getOrder()
     }
 
     private fun getOrder() {
         apolloClient.query(PlaceQuery.builder().place(placeId).build())
-                .enqueue({setMenu(it.data()?.place?.products!!)})
+                .enqueue({
+                    allProducts = it.data()?.place?.products!!
+                    setMenu(it.data()?.place?.products?.filter { !purchaseItems.contains(it._id) }!!.toMutableList())
+                })
     }
-    fun getAdapter() = rvMenu.adapter as ProductsAdapter
+
+    private fun getAdapter() = rvMenu.adapter as ProductsAdapter
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        when(item?.itemId){
+        when (item?.itemId) {
             R.id.shopping_cart -> {
-                showShoppingDialog()
+                startActivity(intentFor<SubOrderActivity>()
+                        .putExtra(SubOrderActivity.PLACE_ID, placeId)
+                        .putExtra(SubOrderActivity.ORDER_ID, orderId)
+                        .putExtra(SubOrderActivity.SUB_ORDER_ID, orderId)
+                        .putExtra(SubOrderActivity.PRODUCTS_ID, purchaseItems))
+                finish()
                 return true
             }
         }
         return super.onOptionsItemSelected(item)
-    }
-
-    private fun showShoppingDialog() {
-        alert {
-            customView {
-                verticalLayout {
-                    listView {
-                        adapter = purchaseAdapter
-                    }
-                    button {
-                        text = "Сделать заказ"
-                        onClick {
-                            apolloClient
-                                    .mutate(SubOrderMutation(prefs.userId, orderId, Input.fromNullable(purchaseItems)))
-                                    .enqueue({ finish() })
-                        }
-                    }
-                }
-            }
-
-        }.show()
     }
 
     override fun onSupportNavigateUp(): Boolean {
@@ -112,15 +128,15 @@ class CreateSuborderActivity : AppCompatActivity(){
         return true
     }
 
-    private fun setMenu(menu: List<PlaceQuery.Product>) {
+    private fun setMenu(menu: MutableList<PlaceQuery.Product>) {
         getAdapter().data = menu
     }
 
-
-    private fun Drawable.setCount(count: Int){
+    private fun Drawable.setCount(count: Int) {
         val bg = this as? LayerDrawable
         bg?.apply {
-            val drawable = (findDrawableByLayerId(R.id.dCounter) as? CounterDrawable) ?: CounterDrawable(applicationContext)
+            val drawable = (findDrawableByLayerId(R.id.dCounter) as? CounterDrawable)
+                    ?: CounterDrawable(applicationContext)
             drawable.count = count.toString()
             setDrawableByLayerId(R.id.dCounter, drawable)
         }

@@ -111,3 +111,17 @@ query Places {
     site
   }
 }
+
+mutation EditSubOrder($subOrderId: String!, $products: [String]) {
+  subOrder(id:$subOrderId, products:$products) {
+    _id
+    products{
+      _id
+      name
+    }
+  }
+}
+
+mutation DeleteSubOrder($subOrderId: String!) {
+  deleteSubOrder(id: $subOrderId)
+}

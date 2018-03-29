@@ -18,9 +18,13 @@
             </intent-filter>
         </activity>
         <activity android:name=".OrdersActivity" />
-        <activity android:name=".DetailsOrderActivity"
-            android:windowSoftInputMode="adjustPan"/>
-        <activity android:name=".CreateSuborderActivity" android:screenOrientation="portrait"/>
+        <activity
+            android:name=".DetailsOrderActivity"
+            android:windowSoftInputMode="adjustPan" />
+        <activity
+            android:name=".CreateSuborderActivity"
+            android:screenOrientation="portrait" />
+        <activity android:name=".SubOrderActivity"></activity>
     </application>
 
 </manifest>
