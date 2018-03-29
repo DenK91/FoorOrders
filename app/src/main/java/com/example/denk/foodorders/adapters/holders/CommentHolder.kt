@@ -9,7 +9,7 @@ import kotlinx.android.synthetic.main.item_comment.*
 class CommentHolder(override val containerView: View?) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
     fun bind(comment: OrderQuery.Comment) {
-        tvCommentAuthor.text = "${comment.user()?.first_name()}  ${comment.user()?.last_name()}"
+        tvCommentAuthor.text = "${comment.user().first_name()}  ${comment.user().last_name()}"
         tvComment.text = comment.text()
     }
 }
