@@ -22,7 +22,7 @@
             android:name=".DetailsOrderActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".CreateSuborderActivity"
+            android:name=".ProductListActivity"
             android:screenOrientation="portrait" />
         <activity android:name=".SubOrderActivity" />
         <activity android:name=".FinishOrderActivity"></activity>
