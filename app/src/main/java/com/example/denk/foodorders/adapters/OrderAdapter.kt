@@ -18,27 +18,23 @@ class OrderAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
         return 1 + (it.subOrders()?.size ?: 0) + (it.comments()?.size ?: 0)
     } ?: 0
 
-    private lateinit var itemClickListener: (order: OrderQuery.Order) -> Unit
     private lateinit var subOrderClickListener: (order: OrderQuery.SubOrder) -> Unit
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
         return when (viewType) {
-            ViewType.HEADER.ordinal -> {
-                val view = parent.context?.layoutInflater?.inflate(R.layout.item_order, parent, false)!!
-                OrderHolder(view).listen { order?.let { it1 -> itemClickListener.invoke(it1) } }
-            }
-            ViewType.SUBORDER.ordinal -> {
-                val view = parent.context?.layoutInflater?.inflate(R.layout.item_suborder, parent, false)!!
-                SubOrderHolder(view).listen { order?.subOrders()?.get(it -1).let { it1 ->
-                    if (it1 != null) {
-                        subOrderClickListener.invoke(it1)
+            ViewType.HEADER.ordinal -> OrderHolder(parent.context?.layoutInflater
+                    ?.inflate(R.layout.item_order, parent, false)!!)
+            ViewType.COMMENT.ordinal -> CommentHolder(parent.context?.layoutInflater
+                    ?.inflate(R.layout.item_comment, parent, false)!!)
+            ViewType.SUBORDER.ordinal -> SubOrderHolder(parent.context?.layoutInflater
+                    ?.inflate(R.layout.item_suborder, parent, false)!!)
+                    .listen { order?.subOrders()?.get(it -1)
+                            .let { it1 ->
+                                if (it1 != null) {
+                                    subOrderClickListener.invoke(it1)
+                                }
+                            }
                     }
-                } }
-            }
-            ViewType.COMMENT.ordinal -> {
-                val view = parent.context?.layoutInflater?.inflate(R.layout.item_comment, parent, false)!!
-                CommentHolder(view).listen { order?.let { it1 -> itemClickListener.invoke(it1) } }
-            }
             else -> throw RuntimeException("View type is not supported!")
         }
     }
@@ -64,10 +60,6 @@ class OrderAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     fun updateOrder(order: OrderQuery.Order) {
         this.order = order
         notifyDataSetChanged()
-    }
-
-    fun itemClickedListen(event: (order: OrderQuery.Order) -> Unit) {
-        itemClickListener = event
     }
 
     fun subOrderClickedListen(event: (order: OrderQuery.SubOrder) -> Unit) {

@@ -42,6 +42,8 @@ query Order($orderId: String!){
          place {
             _id
             description
+            delivery_cost
+            delivery_limit
          }
          date
          state
@@ -126,4 +128,8 @@ mutation EditSubOrder($subOrderId: String!, $comment: String, $products: [String
 
 mutation DeleteSubOrder($subOrderId: String!) {
   deleteSubOrder(id: $subOrderId)
+}
+
+mutation EditState($orderId: String!, $newState: State!) {
+  state(orderId: $orderId, state:$newState)
 }

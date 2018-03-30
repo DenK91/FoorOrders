@@ -46,7 +46,8 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
                 when(order?.state) {
                     State.ACTIVE -> startActivity(intentFor<FinishOrderActivity>()
                             .putExtra(FinishOrderActivity.ORDER_ID_KEY, getOrderId()))
-                    State.PURCHASED -> info {"закрыть"}
+                    State.PURCHASED -> apolloClient.mutate(EditStateMutation(getOrderId(), State.ARCHIVED))
+                            .enqueue({finish()})
                     else -> info{"error"}
                 }
             }
@@ -61,12 +62,8 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         setupToolbar()
         rvOrder.adapter = OrderAdapter()
         rvOrder.layoutManager = LinearLayoutManager(this)
-        getAdapter().itemClickedListen {
-
-            info { it.place.description }
-        }
         getAdapter().subOrderClickedListen {
-            if (it.user._id == prefs.userId) {
+            if (order?.state?.equals(State.PURCHASED)?.not()!! && it.user._id == prefs.userId) {
                 val products : ArrayList<String> = ArrayList()
                 it.products?.forEach { products.add(it._id) }
                 startActivity(intentFor<SubOrderActivity>()
