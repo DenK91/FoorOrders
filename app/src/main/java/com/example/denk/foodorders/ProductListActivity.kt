@@ -89,7 +89,7 @@ class ProductListActivity : AppCompatActivity() {
                             invalidateOptionsMenu()
                         })
             } else {
-                apolloClient.mutate(EditSubOrderMutation(subOrderId!!, Input.fromNullable(null), Input.fromNullable(purchaseItems)))
+                apolloClient.mutate(EditSubOrderMutation(subOrderId!!, Input.fromNullable(comment), Input.fromNullable(purchaseItems)))
                         .enqueue({})
             }
             purchaseItems.add(it._id)

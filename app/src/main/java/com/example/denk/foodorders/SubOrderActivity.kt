@@ -56,12 +56,12 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
 
         rvProducts.adapter = MyOrderAdapter().listenAddProduct {
             purchaseItems.add(it._id)
-            apolloClient.mutate(EditSubOrderMutation(subOrderId, Input.fromNullable(null), Input.fromNullable(purchaseItems)))
+            apolloClient.mutate(EditSubOrderMutation(subOrderId, Input.fromNullable(comment), Input.fromNullable(purchaseItems)))
                     .enqueue({updateList()})
         }.listenRemoveProduct {
             purchaseItems.remove(it._id)
             if(purchaseItems.isNotEmpty()) {
-                apolloClient.mutate(EditSubOrderMutation(subOrderId, Input.fromNullable(null), Input.fromNullable(purchaseItems)))
+                apolloClient.mutate(EditSubOrderMutation(subOrderId, Input.fromNullable(comment), Input.fromNullable(purchaseItems)))
                         .enqueue({updateList()})
             } else {
                 apolloClient.mutate(DeleteSubOrderMutation(subOrderId)).enqueue({finish()})
