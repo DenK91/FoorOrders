@@ -24,7 +24,8 @@
         <activity
             android:name=".CreateSuborderActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".SubOrderActivity"></activity>
+        <activity android:name=".SubOrderActivity" />
+        <activity android:name=".FinishOrderActivity"></activity>
     </application>
 
 </manifest>

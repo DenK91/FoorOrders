@@ -33,7 +33,9 @@ query Orders{
 
 query Order($orderId: String!){
  order(id: $orderId) {
+         _id
          user {
+             _id
              first_name
              last_name
          }
@@ -112,8 +114,8 @@ query Places {
   }
 }
 
-mutation EditSubOrder($subOrderId: String!, $products: [String]) {
-  subOrder(id:$subOrderId, products:$products) {
+mutation EditSubOrder($subOrderId: String!, $comment: String, $products: [String]) {
+  subOrder(id:$subOrderId, products:$products, comment:$comment) {
     _id
     products{
       _id

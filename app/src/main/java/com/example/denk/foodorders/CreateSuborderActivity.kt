@@ -85,7 +85,7 @@ class CreateSuborderActivity : AppCompatActivity() {
                             invalidateOptionsMenu()
                         })
             } else {
-                apolloClient.mutate(EditSubOrderMutation(subOrderId!!, Input.fromNullable(purchaseItems)))
+                apolloClient.mutate(EditSubOrderMutation(subOrderId!!, Input.fromNullable(null), Input.fromNullable(purchaseItems)))
                         .enqueue({})
             }
             purchaseItems.add(it._id)

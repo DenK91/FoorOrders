@@ -9,6 +9,7 @@ import android.view.MotionEvent
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
 import com.example.denk.foodorders.adapters.OrderAdapter
+import com.example.denk.foodorders.type.State
 import kotlinx.android.synthetic.main.activity_details_order.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.info
@@ -25,7 +26,7 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         get() = "dnek"
 
     private var callGetOrderById: ApolloCall<OrderQuery.Data>? = null
-    private var orderId: String? = null
+    private var order: OrderQuery.Order? = null
     private lateinit var placeId: String
     private var optionsMenu : Menu? = null
 
@@ -40,7 +41,15 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
             R.id.create_suborder ->
                 startActivity(intentFor<CreateSuborderActivity>()
                         .putExtra(CreateSuborderActivity.PLACE_ID, placeId)
-                        .putExtra(CreateSuborderActivity.ORDER_ID, orderId))
+                        .putExtra(CreateSuborderActivity.ORDER_ID, getOrderId()))
+            R.id.owner_control -> {
+                when(order?.state) {
+                    State.ACTIVE -> startActivity(intentFor<FinishOrderActivity>()
+                            .putExtra(FinishOrderActivity.ORDER_ID_KEY, getOrderId()))
+                    State.PURCHASED -> info {"закрыть"}
+                    else -> info{"error"}
+                }
+            }
         }
         return super.onOptionsItemSelected(item)
     }
@@ -48,9 +57,6 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_details_order)
-
-        orderId = intent.getStringExtra(ORDER_ID_KEY)
-        info { orderId }
 
         setupToolbar()
         rvOrder.adapter = OrderAdapter()
@@ -65,7 +71,7 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
                 it.products?.forEach { products.add(it._id) }
                 startActivity(intentFor<SubOrderActivity>()
                         .putExtra(SubOrderActivity.PLACE_ID, placeId)
-                        .putExtra(SubOrderActivity.ORDER_ID, orderId)
+                        .putExtra(SubOrderActivity.ORDER_ID, getOrderId())
                         .putExtra(SubOrderActivity.SUB_ORDER_ID, it._id)
                         .putExtra(SubOrderActivity.PRODUCTS_ID, products))
             }
@@ -102,16 +108,18 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         return true
     }
 
+    private fun getOrderId() : String = order?._id ?: intent.getStringExtra(ORDER_ID_KEY)
+
     private fun getOrder(scrollToEnd: Boolean = false) {
         callGetOrderById?.cancel()
-        callGetOrderById = apolloClient.query(OrderQuery.builder().orderId(orderId!!).build())
+        callGetOrderById = apolloClient.query(OrderQuery.builder().orderId(getOrderId()).build())
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
         callGetOrderById?.enqueue({ setOrder(it.data()?.order, scrollToEnd) })
     }
 
     private fun sendComment(text: String) {
         if (!text.isEmpty()) {
-            apolloClient.mutate(CommentMutation(prefs.userId, orderId!!, text))
+            apolloClient.mutate(CommentMutation(prefs.userId, getOrderId(), text))
                     .enqueue({getOrder(true)})
         }
     }
@@ -121,11 +129,25 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
         info { "=====ORDER=====" }
         info { "$order" }
         info { "====================" }
+        this.order = order
         placeId = order!!.place()._id
         getAdapter().updateOrder(order)
         if (scrollToEnd) {
             rvOrder.scrollToPosition(getAdapter().itemCount - 1)
         }
         optionsMenu?.findItem(R.id.create_suborder)?.isVisible = order.subOrders?.none { prefs.userId == it.user._id }!!
+        val ownerControl = optionsMenu?.findItem(R.id.owner_control)
+        if (ownerControl != null) {
+            if (order.user._id == prefs.userId) {
+                ownerControl.isVisible = true
+                when(order.state) {
+                    State.ACTIVE -> ownerControl.title = "Заказать"
+                    State.PURCHASED -> ownerControl.title = "Закрыть"
+                    else -> ownerControl.isVisible = false
+                }
+            } else {
+                ownerControl.isVisible = false
+            }
+        }
     }
 }
