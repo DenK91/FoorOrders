@@ -39,9 +39,9 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
             R.id.create_suborder ->
-                startActivity(intentFor<CreateSuborderActivity>()
-                        .putExtra(CreateSuborderActivity.PLACE_ID, placeId)
-                        .putExtra(CreateSuborderActivity.ORDER_ID, getOrderId()))
+                startActivity(intentFor<ProductListActivity>()
+                        .putExtra(ProductListActivity.PLACE_ID, placeId)
+                        .putExtra(ProductListActivity.ORDER_ID, getOrderId()))
             R.id.owner_control -> {
                 when(order?.state) {
                     State.ACTIVE -> startActivity(intentFor<FinishOrderActivity>()
@@ -70,7 +70,8 @@ class DetailsOrderActivity : AppCompatActivity(), AnkoLogger {
                         .putExtra(SubOrderActivity.PLACE_ID, placeId)
                         .putExtra(SubOrderActivity.ORDER_ID, getOrderId())
                         .putExtra(SubOrderActivity.SUB_ORDER_ID, it._id)
-                        .putExtra(SubOrderActivity.PRODUCTS_ID, products))
+                        .putExtra(SubOrderActivity.PRODUCTS_ID, products)
+                        .putExtra(SubOrderActivity.COMMENT, it.comment))
             }
         }
         etSend.setOnTouchListener { _, event ->

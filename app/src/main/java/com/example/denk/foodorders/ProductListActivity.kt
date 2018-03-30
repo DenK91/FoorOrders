@@ -17,13 +17,14 @@ import com.example.denk.foodorders.views.CounterDrawable
 import kotlinx.android.synthetic.main.activity_create_suborder.*
 import org.jetbrains.anko.*
 
-class CreateSuborderActivity : AppCompatActivity() {
+class ProductListActivity : AppCompatActivity() {
 
     companion object {
         const val PLACE_ID = "place_id"
         const val ORDER_ID = "order_id"
         const val SUB_ORDER_ID = "sub_order_id"
         const val PRODUCTS_ID = "products_id"
+        const val COMMENT = "comment"
     }
 
     private lateinit var placeId: String
@@ -31,7 +32,9 @@ class CreateSuborderActivity : AppCompatActivity() {
     private var subOrderId: String? = null
     private lateinit var allProducts: List<PlaceQuery.Product>
     private var purchaseItems = arrayListOf<String>()
+    private var comment: String? = null
     private var cart: MenuItem? = null
+
     private val purchaseAdapter = object : BaseAdapter() {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val itemId = getItem(position)
@@ -72,6 +75,7 @@ class CreateSuborderActivity : AppCompatActivity() {
         if (products != null && !products.isEmpty()) {
             purchaseItems = products
         }
+        comment = intent.getStringExtra(COMMENT)
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
         supportActionBar?.setHomeButtonEnabled(true)
         rvMenu.adapter = ProductsAdapter()
@@ -114,8 +118,9 @@ class CreateSuborderActivity : AppCompatActivity() {
                 startActivity(intentFor<SubOrderActivity>()
                         .putExtra(SubOrderActivity.PLACE_ID, placeId)
                         .putExtra(SubOrderActivity.ORDER_ID, orderId)
-                        .putExtra(SubOrderActivity.SUB_ORDER_ID, orderId)
-                        .putExtra(SubOrderActivity.PRODUCTS_ID, purchaseItems))
+                        .putExtra(SubOrderActivity.SUB_ORDER_ID, subOrderId)
+                        .putExtra(SubOrderActivity.PRODUCTS_ID, purchaseItems)
+                        .putExtra(SubOrderActivity.COMMENT, comment))
                 finish()
                 return true
             }

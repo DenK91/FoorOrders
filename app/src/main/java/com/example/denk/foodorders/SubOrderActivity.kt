@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import android.view.Menu
 import android.view.MenuItem
+import android.view.MotionEvent
 import com.apollographql.apollo.api.Input
 import com.example.denk.foodorders.adapters.MyOrderAdapter
 import kotlinx.android.synthetic.main.activity_sub_order.*
@@ -21,6 +22,7 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
         const val ORDER_ID = "order_id"
         const val SUB_ORDER_ID = "sub_order_id"
         const val PRODUCTS_ID = "products_id"
+        const val COMMENT = "comment"
     }
 
     private lateinit var placeId : String
@@ -28,6 +30,7 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
     private lateinit var subOrderId: String
     private lateinit var allProducts : List<PlaceQuery.Product>
     private var purchaseItems = arrayListOf<String>()
+    private var comment: String? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -36,14 +39,16 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
         placeId = intent.getStringExtra(PLACE_ID)
         orderId = intent.getStringExtra(ORDER_ID)
         subOrderId = intent.getStringExtra(SUB_ORDER_ID)
+        comment = intent.getStringExtra(COMMENT)
         val products = intent.getStringArrayListExtra(PRODUCTS_ID)
         if (products != null && !products.isEmpty()) {
             purchaseItems = products
         } else {
-            startActivity(intentFor<CreateSuborderActivity>()
-                    .putExtra(CreateSuborderActivity.PLACE_ID, placeId)
-                    .putExtra(CreateSuborderActivity.ORDER_ID, orderId)
-                    .putExtra(CreateSuborderActivity.SUB_ORDER_ID, subOrderId))
+            startActivity(intentFor<ProductListActivity>()
+                    .putExtra(ProductListActivity.PLACE_ID, placeId)
+                    .putExtra(ProductListActivity.ORDER_ID, orderId)
+                    .putExtra(ProductListActivity.SUB_ORDER_ID, subOrderId)
+                    .putExtra(ProductListActivity.COMMENT, comment))
             finish()
         }
         supportActionBar?.setDisplayHomeAsUpEnabled(true)
@@ -65,7 +70,23 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
         }
         rvProducts.layoutManager = LinearLayoutManager(this)
         swipeRefreshLayout.setOnRefreshListener { getPlace() }
+        etSend.setOnTouchListener { _, event ->
+            if (event.action == MotionEvent.ACTION_UP) {
+                if (event.rawX >= (etSend.right - etSend.compoundDrawables[2].bounds.width())) {
+                    comment = etSend.text.toString()
+                    sendComment(comment)
+                    etSend.text.clear()
+                }
+            }
+            false
+        }
+
         getPlace()
+    }
+
+    private fun sendComment(comment: String?) {
+        apolloClient.mutate(EditSubOrderMutation(subOrderId, Input.fromNullable(comment), Input.fromNullable(purchaseItems)))
+                .enqueue({ updateList()})
     }
 
     private fun getAdapter() = rvProducts.adapter as MyOrderAdapter
@@ -83,11 +104,12 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when(item?.itemId){
             R.id.products_list -> {
-                startActivity(intentFor<CreateSuborderActivity>()
-                        .putExtra(CreateSuborderActivity.PLACE_ID, placeId)
-                        .putExtra(CreateSuborderActivity.ORDER_ID, orderId)
-                        .putExtra(CreateSuborderActivity.SUB_ORDER_ID, subOrderId)
-                        .putExtra(CreateSuborderActivity.PRODUCTS_ID, purchaseItems))
+                startActivity(intentFor<ProductListActivity>()
+                        .putExtra(ProductListActivity.PLACE_ID, placeId)
+                        .putExtra(ProductListActivity.ORDER_ID, orderId)
+                        .putExtra(ProductListActivity.SUB_ORDER_ID, subOrderId)
+                        .putExtra(ProductListActivity.PRODUCTS_ID, purchaseItems)
+                        .putExtra(ProductListActivity.COMMENT, comment))
                 finish()
                 return true
             }
@@ -109,6 +131,6 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
     private fun updateList() {
         getAdapter().updateProducts(purchaseItems.map {pId ->
             allProducts.find { it._id == pId }!!
-        }.groupBy { it._id })
+        }.groupBy { it._id }, comment )
     }
 }

@@ -61,6 +61,7 @@ query Order($orderId: String!){
                 photo
                 price
             }
+            comment
          }
          comments {
             text
