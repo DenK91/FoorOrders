@@ -10,6 +10,7 @@ import com.example.denk.foodorders.type.State
 import kotlinx.android.synthetic.main.activity_finish_order.*
 import org.jetbrains.anko.AnkoLogger
 import org.jetbrains.anko.sdk25.coroutines.onClick
+import java.text.NumberFormat
 
 class FinishOrderActivity : AppCompatActivity(), AnkoLogger {
 
@@ -67,6 +68,19 @@ class FinishOrderActivity : AppCompatActivity(), AnkoLogger {
         getAdapter().data = allProductsInOrder
         var sum : Long = 0
         allProductsInOrder.forEach { it.forEach { sum +=it.price } }
-        btnFinishOrder.text = "Заказать на сумму $sum"
+        var deliveryCost : Long = 0
+        if (order.place.delivery_limit!! < sum) {
+            deliveryInfo.text = "Бесплатная доставка"
+        } else {
+            val deliveryCostStr = "\n+${NumberFormat.getCurrencyInstance().format(order.place.delivery_cost)}" +
+                    " за доставку"
+            val sumForFreeDelivery = "\nнеобходимо еще" +
+                    " ${NumberFormat.getCurrencyInstance().format(order.place.delivery_limit - sum)}" +
+                    " для бесплатной доставки"
+            deliveryInfo.text = "Продуктов на сумму ${NumberFormat.getCurrencyInstance().format(sum)}" +
+                    deliveryCostStr + sumForFreeDelivery
+            deliveryCost = order.place.delivery_cost!!
+        }
+        btnFinishOrder.text = "Заказать на сумму ${NumberFormat.getCurrencyInstance().format(sum + deliveryCost)}"
     }
 }

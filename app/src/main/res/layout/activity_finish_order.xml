@@ -20,6 +20,16 @@
 
     </android.support.v4.widget.SwipeRefreshLayout>
 
+    <TextView
+        android:id="@+id/deliveryInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:padding="8dp"
+        android:textSize="16sp"
+        android:textStyle="italic"
+        android:gravity="center"
+        tools:text="asfghdsfghsgfhsfgh\ndasghsfgh\nsfgh"/>
+
     <Button
         android:id="@+id/btnFinishOrder"
         android:layout_width="match_parent"

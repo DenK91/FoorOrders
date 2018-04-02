@@ -13,6 +13,7 @@ class OrderAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     enum class ViewType { HEADER, COMMENT, SUBORDER }
 
     private var order: OrderQuery.Order? = null
+    private var deliveryCost: Long? = null
 
     override fun getItemCount(): Int = order?.let {
         return 1 + (it.subOrders()?.size ?: 0) + (it.comments()?.size ?: 0)
@@ -52,13 +53,21 @@ class OrderAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
     override fun onBindViewHolder(holder: RecyclerView.ViewHolder, position: Int) {
         when (holder) {
             is OrderHolder -> order?.let { holder.bind(it) }
-            is SubOrderHolder -> order?.subOrders()?.get(position - 1)?.let { holder.bind(it) }
+            is SubOrderHolder -> order?.subOrders()?.get(position - 1)?.let { holder.bind(it, deliveryCost!!) }
             is CommentHolder -> order?.comments()?.get(position - 1 - subordersEnd())?.let { holder.bind(it) }
         }
     }
 
     fun updateOrder(order: OrderQuery.Order) {
         this.order = order
+        var sum : Long = 0
+        order.subOrders()?.flatMap { it.products()?.toList()!! }?.groupBy { it._id() }
+                ?.map { it.value }?.toMutableList()?.forEach { it.forEach { sum +=it.price() } }
+        if (sum < order.place().delivery_limit()!! && order.subOrders()?.isNotEmpty()!!) {
+            this.deliveryCost = order.place().delivery_cost()!! / order.subOrders()!!.size
+        } else {
+            this.deliveryCost = 0
+        }
         notifyDataSetChanged()
     }
 

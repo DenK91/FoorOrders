@@ -11,9 +11,10 @@ import java.text.NumberFormat
 
 class SubOrderHolder(override val containerView: View?) : RecyclerView.ViewHolder(containerView), LayoutContainer {
 
-    fun bind(suborder: OrderQuery.SubOrder) {
+    fun bind(suborder: OrderQuery.SubOrder, deliveryCost : Long) {
         tvSuborderAuthor.text = "${suborder.user().first_name()}  ${suborder.user().last_name()}"
-        tvSuborderSum.text = "${NumberFormat.getCurrencyInstance().format(suborder.products()?.sumBy { it.price().toInt() })} "
+        tvSuborderSum.text = "${NumberFormat.getCurrencyInstance().format(suborder.products()?.sumBy { it.price().toInt() })}"
+        tvDeliveryCost.text = " + ${NumberFormat.getCurrencyInstance().format(deliveryCost)} за доставку"
         productsContainer.removeAllViews()
 
         suborder.products()?.groupBy { it._id() }?.values?.forEach {
