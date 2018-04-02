@@ -25,5 +25,11 @@ class SubOrderHolder(override val containerView: View?) : RecyclerView.ViewHolde
             miniProductView.setProducts(it)
         }
 
+        if (suborder.comment().isNullOrEmpty()) {
+            tvComment.visibility = View.GONE
+        } else {
+            tvComment.visibility = View.VISIBLE
+            tvComment.text = "Комментарий: ${suborder.comment()}"
+        }
     }
 }

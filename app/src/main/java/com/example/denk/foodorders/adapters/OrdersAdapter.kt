@@ -1,14 +1,11 @@
 package com.example.denk.foodorders.adapters
 
 import android.support.v7.widget.RecyclerView
-import android.view.View
 import android.view.ViewGroup
 import com.example.denk.foodorders.OrdersQuery
 import com.example.denk.foodorders.R
+import com.example.denk.foodorders.adapters.holders.OrderHolder
 import com.example.denk.foodorders.listen
-import com.example.denk.foodorders.toDateString
-import kotlinx.android.extensions.LayoutContainer
-import kotlinx.android.synthetic.main.item_order.*
 import org.jetbrains.anko.layoutInflater
 
 class OrdersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
@@ -37,15 +34,6 @@ class OrdersAdapter : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     fun itemClickedListen(event: (order: OrdersQuery.Order) -> Unit) {
         itemClickListener = event
-    }
-
-    class OrderHolder(override val containerView: View?) : RecyclerView.ViewHolder(containerView), LayoutContainer {
-
-        fun bind(order: OrdersQuery.Order) {
-            tvOrderTitle.text = order.place().description()
-            tvAuthor.text = "${order.user().first_name()}  ${order.user().last_name()}"
-            tvTimestamp.text = order.date()?.toDateString()
-        }
     }
 
 }
