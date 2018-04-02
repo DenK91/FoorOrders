@@ -24,16 +24,17 @@
         android:id="@+id/deliveryInfo"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:gravity="center"
         android:padding="8dp"
         android:textSize="16sp"
         android:textStyle="italic"
-        android:gravity="center"
-        tools:text="asfghdsfghsgfhsfgh\ndasghsfgh\nsfgh"/>
+        tools:text="asfghdsfghsgfhsfgh\ndasghsfgh\nsfgh" />
 
     <Button
         android:id="@+id/btnFinishOrder"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
+        android:background="@color/transparent"
         android:text="Заказать" />
 
 </LinearLayout>
