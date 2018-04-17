@@ -1,4 +1,4 @@
-package com.example.denk.foodorders
+package com.example.denk.foodorders.ui
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.MotionEvent
 import com.apollographql.apollo.api.Input
+import com.example.denk.foodorders.*
 import com.example.denk.foodorders.adapters.MyOrderAdapter
 import kotlinx.android.synthetic.main.activity_sub_order.*
 import org.jetbrains.anko.AnkoLogger
@@ -55,11 +56,11 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
         supportActionBar?.setHomeButtonEnabled(true)
 
         rvProducts.adapter = MyOrderAdapter().listenAddProduct {
-            purchaseItems.add(it._id)
+            purchaseItems.add(it._id())
             apolloClient.mutate(EditSubOrderMutation(subOrderId, Input.fromNullable(comment), Input.fromNullable(purchaseItems)))
                     .enqueue({updateList()})
         }.listenRemoveProduct {
-            purchaseItems.remove(it._id)
+            purchaseItems.remove(it._id())
             if(purchaseItems.isNotEmpty()) {
                 apolloClient.mutate(EditSubOrderMutation(subOrderId, Input.fromNullable(comment), Input.fromNullable(purchaseItems)))
                         .enqueue({updateList()})
@@ -121,7 +122,7 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
         apolloClient.query(PlaceQuery.builder().place(placeId).build())
                 .enqueue({
                     swipeRefreshLayout.isRefreshing = false
-                    allProducts = it.data()?.place?.products!!
+                    allProducts = it.data()?.place()?.products()!!
                     updateList()
                 }, {
                     swipeRefreshLayout.isRefreshing = false
@@ -130,7 +131,7 @@ class SubOrderActivity : AppCompatActivity(), AnkoLogger {
 
     private fun updateList() {
         getAdapter().updateProducts(purchaseItems.map {pId ->
-            allProducts.find { it._id == pId }!!
-        }.groupBy { it._id }, comment )
+            allProducts.find { it._id() == pId }!!
+        }.groupBy { it._id() }, comment )
     }
 }

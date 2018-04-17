@@ -38,3 +38,20 @@ task preBuild(type: Exec) {
         args "-c", "apollo-codegen download-schema http://192.168.88.13:8080/graphql --output ./app/src/main/graphql/com/example/denk/foodorders/schema.json"
     }
 }
+
+ext {
+    kotlin_version = '1.2.31'
+
+    // Dependencies
+    supportVersion = '27.1.0'
+    archVersion = '1.1.1'
+    retrofitVersion = '2.3.0'
+    okhttpVersion = '3.8.0'
+    rxJavaVersion = '2.1.12'
+    rxJavaKotlinVersion = '2.2.0'
+    rxAndroidVersion = '2.0.2'
+    anko_version='0.10.4'
+    glideVersion = '4.3.1'
+    mockitoVersion = '2.8.9'
+    hamcrestVersion = '1.3'
+}

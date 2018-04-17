@@ -2,7 +2,12 @@ apply plugin: 'com.android.application'
 apply plugin: 'com.apollographql.android'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
+apply plugin: 'kotlin-platform-android'
+apply plugin: 'kotlin-kapt'
 
+kapt {
+    mapDiagnosticLocations = true
+}
 androidExtensions {
     experimental = true
 }
@@ -38,4 +43,9 @@ dependencies {
     implementation "com.apollographql.apollo:apollo-android-support:$graphql_version"
     implementation "org.jetbrains.anko:anko:$anko_version"
     implementation "org.jetbrains.anko:anko-commons:$anko_version"
+
+    // Lifecycle arch
+    kapt "android.arch.lifecycle:compiler:$rootProject.archVersion"
+    implementation "android.arch.lifecycle:runtime:1.1.1"
+    implementation "android.arch.lifecycle:extensions:$rootProject.archVersion"
 }

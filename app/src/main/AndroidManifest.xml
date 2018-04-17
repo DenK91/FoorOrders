@@ -9,22 +9,22 @@
         android:label="@string/app_name"
         android:supportsRtl="true"
         android:theme="@style/AppTheme">
-        <activity android:name=".MainActivity">
+        <activity android:name=".ui.LoginActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
                 <category android:name="android.intent.category.LAUNCHER" />
             </intent-filter>
         </activity>
-        <activity android:name=".OrdersActivity" />
+        <activity android:name=".ui.OrdersActivity" />
         <activity
-            android:name=".DetailsOrderActivity"
+            android:name=".ui.DetailsOrderActivity"
             android:windowSoftInputMode="adjustPan" />
         <activity
-            android:name=".ProductListActivity"
+            android:name=".ui.ProductListActivity"
             android:screenOrientation="portrait" />
-        <activity android:name=".SubOrderActivity" />
-        <activity android:name=".FinishOrderActivity"/>
+        <activity android:name=".ui.SubOrderActivity" />
+        <activity android:name=".ui.FinishOrderActivity"/>
     </application>
 
 </manifest>

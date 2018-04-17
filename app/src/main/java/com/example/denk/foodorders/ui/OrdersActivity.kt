@@ -1,4 +1,4 @@
-package com.example.denk.foodorders
+package com.example.denk.foodorders.ui
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
@@ -13,6 +13,7 @@ import org.jetbrains.anko.info
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.sdk25.coroutines.onClick
 import android.support.v7.app.AlertDialog
+import com.example.denk.foodorders.*
 import com.example.denk.foodorders.adapters.OrdersAdapter
 import com.example.denk.foodorders.adapters.PlaceAdapter
 import org.jetbrains.anko.toast
@@ -33,9 +34,9 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         rvOrders.adapter = OrdersAdapter()
         rvOrders.layoutManager = LinearLayoutManager(this)
         getAdapter().itemClickedListen {
-            info { it.place.description }
+            info { it.place().description() }
             startActivity(intentFor<DetailsOrderActivity>()
-                    .putExtra(DetailsOrderActivity.ORDER_ID_KEY, it._id))
+                    .putExtra(DetailsOrderActivity.ORDER_ID_KEY, it._id()))
         }
         swipeRefreshLayout.setOnRefreshListener { getOrders() }
         btnAddOrder.onClick { showPlaces() }
@@ -72,7 +73,7 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         when (item.itemId) {
             R.id.logout -> {
                 prefs.userId = ""
-                startActivity(intentFor<MainActivity>())
+                startActivity(intentFor<LoginActivity>())
                 finish()
             }
         }
@@ -90,7 +91,7 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
         callGetListOrders?.enqueue({
             if (it.data() != null) {
-                setOrders(it.data()!!.orders)
+                setOrders(it.data()!!.orders())
             } else {
                 setOrders(null)
             }
@@ -103,7 +104,7 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         swipeRefreshLayout.isRefreshing = false
         info { "=====ORDES LIST=====" }
         orders?.forEach {
-            info { "${it.place.description} ${it.user.first_name} ${it.user.last_name}" }
+            info { "${it.place().description()} ${it.user().first_name()} ${it.user().last_name()}" }
         }
         info { "====================" }
         getAdapter().updateOrders(orders)
@@ -114,7 +115,7 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
         callPlacesQuery = apolloClient.query(PlacesQuery.builder().build())
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
         callPlacesQuery?.enqueue({
-            val places = it.data()?.places
+            val places = it.data()?.places()
             if (places != null && places.isNotEmpty()) {
                 val builderSingle = AlertDialog.Builder(this@OrdersActivity)
                 builderSingle.setIcon(R.mipmap.ic_launcher)
@@ -126,17 +127,17 @@ class OrdersActivity : AppCompatActivity(), AnkoLogger {
                 builderSingle.setAdapter(arrayAdapter, { _, which ->
                     val place = arrayAdapter.getItem(which)
                     val builderInner = AlertDialog.Builder(this@OrdersActivity)
-                    builderInner.setMessage("${place.name}\n${place.description}")
+                    builderInner.setMessage("${place.name()}\n${place.description()}")
                     builderInner.setTitle("Вы выбрали:")
                     builderInner.setPositiveButton("Создать", { dialog, _ ->
                         run {
                             callCreateOrderMutation?.cancel()
                             callCreateOrderMutation = apolloClient.mutate(CreateOrderMutation.builder()
-                                    .userId(prefs.userId).placeId(place._id).build())
+                                    .userId(prefs.userId).placeId(place._id()).build())
                             callCreateOrderMutation?.enqueue({
                                 dialog.dismiss()
                                 startActivity(intentFor<DetailsOrderActivity>()
-                                        .putExtra(DetailsOrderActivity.ORDER_ID_KEY, it.data()?.order!!._id))
+                                        .putExtra(DetailsOrderActivity.ORDER_ID_KEY, it.data()?.order()!!._id()))
                                 toast("Заказ создан успешно!")
                             }, {
                                 dialog.dismiss()

@@ -1,10 +1,11 @@
-package com.example.denk.foodorders
+package com.example.denk.foodorders.ui
 
 import android.support.v7.app.AppCompatActivity
 import android.os.Bundle
 import android.support.v7.widget.LinearLayoutManager
 import com.apollographql.apollo.ApolloCall
 import com.apollographql.apollo.fetcher.ApolloResponseFetchers
+import com.example.denk.foodorders.*
 import com.example.denk.foodorders.adapters.FinishProductsAdapter
 import com.example.denk.foodorders.type.State
 import kotlinx.android.synthetic.main.activity_finish_order.*
@@ -46,7 +47,7 @@ class FinishOrderActivity : AppCompatActivity(), AnkoLogger {
 
     private fun getAdapter(): FinishProductsAdapter = rvOrder.adapter as FinishProductsAdapter
 
-    private fun getOrderId() : String = order?._id ?: intent.getStringExtra(DetailsOrderActivity.ORDER_ID_KEY)
+    private fun getOrderId() : String = order?._id() ?: intent.getStringExtra(DetailsOrderActivity.ORDER_ID_KEY)
 
     override fun onSupportNavigateUp(): Boolean {
         onBackPressed()
@@ -57,29 +58,29 @@ class FinishOrderActivity : AppCompatActivity(), AnkoLogger {
         callGetOrderById?.cancel()
         callGetOrderById = apolloClient.query(OrderQuery.builder().orderId(getOrderId()).build())
                 .responseFetcher(ApolloResponseFetchers.NETWORK_FIRST)
-        callGetOrderById?.enqueue({ setOrder(it.data()?.order) })
+        callGetOrderById?.enqueue({ setOrder(it.data()?.order()) })
     }
 
     private fun setOrder(order: OrderQuery.Order?) {
         swipeRefreshLayout.isRefreshing = false
         this.order = order
-        val allProductsInOrder = order?.subOrders?.flatMap { it.products?.toList()!! }
+        val allProductsInOrder = order?.subOrders()?.flatMap { it.products()?.toList()!! }
                 ?.groupBy { it._id() }?.map { it.value }?.toMutableList()!!
         getAdapter().data = allProductsInOrder
         var sum : Long = 0
-        allProductsInOrder.forEach { it.forEach { sum +=it.price } }
+        allProductsInOrder.forEach { it.forEach { sum +=it.price() } }
         var deliveryCost : Long = 0
-        if (order.place.delivery_limit!! < sum) {
+        if (order.place().delivery_limit()!! < sum) {
             deliveryInfo.text = "Бесплатная доставка"
         } else {
-            val deliveryCostStr = "\n+${NumberFormat.getCurrencyInstance().format(order.place.delivery_cost)}" +
+            val deliveryCostStr = "\n+${NumberFormat.getCurrencyInstance().format(this.order!!.place().delivery_cost())}" +
                     " за доставку"
             val sumForFreeDelivery = "\nнеобходимо еще" +
-                    " ${NumberFormat.getCurrencyInstance().format(order.place.delivery_limit - sum)}" +
+                    " ${NumberFormat.getCurrencyInstance().format(this.order!!.place().delivery_limit()!! - sum)}" +
                     " для бесплатной доставки"
             deliveryInfo.text = "Продуктов на сумму ${NumberFormat.getCurrencyInstance().format(sum)}" +
                     deliveryCostStr + sumForFreeDelivery
-            deliveryCost = order.place.delivery_cost!!
+            deliveryCost = this.order!!.place().delivery_cost()!!
         }
         btnFinishOrder.text = "Заказать на сумму ${NumberFormat.getCurrencyInstance().format(sum + deliveryCost)}"
     }

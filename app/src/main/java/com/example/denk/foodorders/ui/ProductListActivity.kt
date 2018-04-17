@@ -1,4 +1,4 @@
-package com.example.denk.foodorders
+package com.example.denk.foodorders.ui
 
 import android.graphics.drawable.Drawable
 import android.graphics.drawable.LayerDrawable
@@ -12,6 +12,7 @@ import android.view.ViewGroup
 import android.widget.BaseAdapter
 import android.widget.TextView
 import com.apollographql.apollo.api.Input
+import com.example.denk.foodorders.*
 import com.example.denk.foodorders.adapters.ProductsAdapter
 import com.example.denk.foodorders.views.CounterDrawable
 import kotlinx.android.synthetic.main.activity_create_suborder.*
@@ -38,7 +39,7 @@ class ProductListActivity : AppCompatActivity() {
     private val purchaseAdapter = object : BaseAdapter() {
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
             val itemId = getItem(position)
-            val itemName = allProducts.first { it._id == itemId }.name
+            val itemName = allProducts.first { it._id() == itemId }.name()
             val v = layoutInflater.inflate(android.R.layout.simple_list_item_1, parent, false)
             v.findViewById<TextView>(android.R.id.text1).text = itemName
             return v
@@ -82,9 +83,9 @@ class ProductListActivity : AppCompatActivity() {
         rvMenu.layoutManager = LinearLayoutManager(this)
         getAdapter().itemClickedListen {
             if (purchaseItems.isEmpty()) {
-                apolloClient.mutate(SubOrderMutation(prefs.userId, orderId, Input.fromNullable(listOf(it._id))))
+                apolloClient.mutate(SubOrderMutation(prefs.userId, orderId, Input.fromNullable(listOf(it._id()))))
                         .enqueue({
-                            subOrderId = it.data()?.subOrder?._id
+                            subOrderId = it.data()?.subOrder()?._id()
                             cart?.isVisible = true
                             invalidateOptionsMenu()
                         })
@@ -92,7 +93,7 @@ class ProductListActivity : AppCompatActivity() {
                 apolloClient.mutate(EditSubOrderMutation(subOrderId!!, Input.fromNullable(comment), Input.fromNullable(purchaseItems)))
                         .enqueue({})
             }
-            purchaseItems.add(it._id)
+            purchaseItems.add(it._id())
             //do some animations
             val index = getAdapter().data.indexOf(it)
             val itemView = rvMenu.layoutManager.findViewByPosition(index)
@@ -105,8 +106,8 @@ class ProductListActivity : AppCompatActivity() {
     private fun getOrder() {
         apolloClient.query(PlaceQuery.builder().place(placeId).build())
                 .enqueue({
-                    allProducts = it.data()?.place?.products!!
-                    setMenu(it.data()?.place?.products?.filter { !purchaseItems.contains(it._id) }!!.toMutableList())
+                    allProducts = it.data()?.place()?.products()!!
+                    setMenu(it.data()?.place()?.products()?.filter { !purchaseItems.contains(it._id()) }!!.toMutableList())
                 })
     }
 
