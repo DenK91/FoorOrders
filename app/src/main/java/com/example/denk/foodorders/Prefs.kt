@@ -27,8 +27,8 @@ class Prefs (context: Context) {
         get() = User(userId, userFirstName, userLastName)
         set(value) {
             userId = value.id
-            userFirstName = value.firstName
-            userLastName = value.lastName
+            userFirstName = value.firstName ?: ""
+            userLastName = value.lastName ?: ""
         }
 
     fun logout() {

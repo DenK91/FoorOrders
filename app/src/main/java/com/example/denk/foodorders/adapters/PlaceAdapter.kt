@@ -8,14 +8,14 @@ import android.widget.BaseAdapter
 import android.view.LayoutInflater
 import org.jetbrains.anko.layoutInflater
 import android.widget.TextView
-import com.example.denk.foodorders.PlacesQuery
 import com.example.denk.foodorders.R
+import com.example.denk.foodorders.data.Place
 
-class PlaceAdapter(val ctx: Context, private val dataset: MutableList<PlacesQuery.Place>) : BaseAdapter() {
+class PlaceAdapter(val ctx: Context, private val dataset: MutableList<Place>) : BaseAdapter() {
 
     private var lInflater: LayoutInflater = ctx.layoutInflater
 
-    override fun getItem(position: Int): PlacesQuery.Place = dataset[position]
+    override fun getItem(position: Int): Place = dataset[position]
 
     override fun getItemId(position: Int): Long = position.toLong()
 
@@ -33,29 +33,29 @@ class PlaceAdapter(val ctx: Context, private val dataset: MutableList<PlacesQuer
         val tvPlaceDescription = (view.findViewById(R.id.tvPlaceDescription) as TextView)
         val tvPhone = (view.findViewById(R.id.tvPhone) as TextView)
         val tvSite = (view.findViewById(R.id.tvSite) as TextView)
-        if (TextUtils.isEmpty(p.name())) {
+        if (TextUtils.isEmpty(p.name)) {
             tvPlaceName.visibility = View.GONE
         } else {
             tvPlaceName.visibility = View.VISIBLE
-            tvPlaceName.text = p.name()
+            tvPlaceName.text = p.name
         }
-        if (TextUtils.isEmpty(p.description())) {
+        if (TextUtils.isEmpty(p.description)) {
             tvPlaceDescription.visibility = View.GONE
         } else {
             tvPlaceDescription.visibility = View.VISIBLE
-            tvPlaceDescription.text = p.description()
+            tvPlaceDescription.text = p.description
         }
-        if (TextUtils.isEmpty(p.phone())) {
+        if (TextUtils.isEmpty(p.phone)) {
             tvPhone.visibility = View.GONE
         } else {
             tvPhone.visibility = View.VISIBLE
-            tvPhone.text = p.phone()
+            tvPhone.text = p.phone
         }
-        if (TextUtils.isEmpty(p.site())) {
+        if (TextUtils.isEmpty(p.site)) {
             tvSite.visibility = View.GONE
         } else {
             tvSite.visibility = View.VISIBLE
-            tvSite.text = p.site()
+            tvSite.text = p.site
         }
         return view
     }
